@@ -1,0 +1,30 @@
+CompileFlags:
+  Add:
+    - "--target=thumbv7m-none-eabi"
+    - "-mcpu=cortex-m3"
+    - "-IC:/Users/86198/Desktop/毕业设计/stm32f103c8_freertos-standard_library(1)/freeRTOS/include"
+    - "-IC:/Users/86198/Desktop/毕业设计/stm32f103c8_freertos-standard_library(1)/freeRTOS/port/ARM_CM3"
+    - "-IC:/Users/86198/Desktop/毕业设计/stm32f103c8_freertos-standard_library(1)/Library/CMSIS"
+    - "-IC:/Users/86198/Desktop/毕业设计/stm32f103c8_freertos-standard_library(1)/Library/FWlib/inc"
+    - "-IC:/Users/86198/Desktop/毕业设计/stm32f103c8_freertos-standard_library(1)/User"
+    - "-IC:/Users/86198/Desktop/毕业设计/stm32f103c8_freertos-standard_library(1)/User/Key"
+    - "-IC:/Users/86198/Desktop/毕业设计/stm32f103c8_freertos-standard_library(1)/User/led"
+    - "-IC:/Users/86198/Desktop/毕业设计/stm32f103c8_freertos-standard_library(1)/User/usart"
+    - "-IC:/Users/86198/Desktop/毕业设计/stm32f103c8_freertos-standard_library(1)/User/Air780e"
+    - "-IC:/Keil_v5/ARM/ARMCC/include"
+    - "-fms-extensions"
+    - "-fdeclspec"
+    - "-DSTM32F10X_MD"
+    - "-DUSE_STDPERIPH_DRIVER"
+    - "-D__forceinline=inline"
+    - "-D__inline=inline"
+
+Diagnostics:
+  Suppress:
+    - "unused_parameter"
+    - "unknown_attributes"
+---
+If:
+  PathMatch: .*portmacro\.h
+Diagnostics:
+  Suppress: "*"
