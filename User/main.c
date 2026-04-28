@@ -11,7 +11,7 @@
 #include "bsp_usart.h"
 #include <stdio.h>
 
-
+//第二次提交测试
 /*Function definition*/
 extern void myCodeStart(void);
 static void BSP_Init(void);
