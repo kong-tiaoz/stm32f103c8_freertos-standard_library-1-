@@ -244,6 +244,7 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px}
     <button data-tab="statemachine">状态机</button>
     <button data-tab="algorithms">关键算法</button>
     <button data-tab="code">源码结构</button>
+    <button data-tab="gallery">📷 实物展示</button>
   </nav>
 </header>
 
@@ -878,6 +879,14 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px}
       </div>
     </div>
   </div>
+
+  <div class="panel full" style="margin-top:18px;">
+    <h3>外壳结构设计 — Sharp3D 建模</h3>
+    <div style="text-align:center">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">面向野外部署的三防外壳设计（IP65防护等级考虑）</div>
+      <img src="外壳sharp3D建模图.png" alt="外壳Sharp3D建模" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" loading="lazy">
+    </div>
+  </div>
 </section>
 
 <!-- ==================== 硬件原理图 ==================== -->
@@ -971,6 +980,48 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px}
       <line x1="840" y1="220" x2="840" y2="290" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrowHwA)" stroke-dasharray="8,4"/>
       <text x="855" y="258" fill="#f59e0b" font-size="9">4G LTE</text>
     </svg>
+  </div>
+
+  <div class="panel full" style="margin-top:18px;">
+    <h3>PCB 设计与硬件实物</h3>
+    <div class="grid2">
+      <div style="text-align:center">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">PCB 底板设计图</div>
+        <img src="PCB底板.png" alt="PCB底板" style="width:100%;border-radius:8px;border:1px solid var(--border)" loading="lazy">
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">最小系统板 PCB</div>
+        <img src="PCB最小系统板.jpg" alt="PCB最小系统板" style="width:100%;border-radius:8px;border:1px solid var(--border)" loading="lazy">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel full" style="margin-top:18px;">
+    <h3>电源电路设计</h3>
+    <div class="grid2">
+      <div style="text-align:center">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">DC-DC 4.7-12V 转 3.9V 电路</div>
+        <img src="DC-DC4.7-12V转3.9V电路.png" alt="DC-DC 4.7-12V转3.9V" style="width:100%;border-radius:8px;border:1px solid var(--border)" loading="lazy">
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">DC-DC 5V 转 3.3V 电路</div>
+        <img src="DC-DC5V转3.3V电路.png" alt="DC-DC 5V转3.3V" style="width:100%;border-radius:8px;border:1px solid var(--border)" loading="lazy">
+      </div>
+    </div>
+  </div>
+
+  <div class="panel full" style="margin-top:18px;">
+    <h3>原理图与3D模型</h3>
+    <div class="grid2">
+      <div style="text-align:center">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">部分原理图</div>
+        <img src="部分原理图.png" alt="部分原理图" style="width:100%;border-radius:8px;border:1px solid var(--border)" loading="lazy">
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px">最小系统板 3D 视图</div>
+        <img src="最小系统版3D.jpg" alt="最小系统板3D" style="width:100%;border-radius:8px;border:1px solid var(--border)" loading="lazy">
+      </div>
+    </div>
   </div>
 </section>
 
@@ -1083,6 +1134,14 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px}
         <tr style="color:var(--text2)"><td>id:9</td><td>deviceId:ice</td><td>longitude</td><td>latitude</td><td>altitude</td><td>pointType</td></tr>
         <tr style="color:var(--accent)"><td>消息ID</td><td>设备标识</td><td>经度(°)</td><td>纬度(°)</td><td>海拔(m)</td><td>覆冰点类型</td></tr>
       </table>
+    </div>
+  </div>
+
+  <div class="panel full" style="margin-top:18px;">
+    <h3>MQTTBox 数据接收验证</h3>
+    <div style="text-align:center">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px">MQTTBox 客户端订阅 /BEIDOU001/datas 实时接收定位数据</div>
+      <img src="mqttbox数据接收示例图.png" alt="MQTTBox数据接收" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" loading="lazy">
     </div>
   </div>
 </section>
@@ -1321,6 +1380,13 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px}
 <section class="section" id="tab-code">
   <div class="section-title">源码结构 — 文件依赖与模块关系</div>
 
+  <div class="panel full" style="margin-bottom:18px;">
+    <h3>开发环境 — VS Code + Keil MDK</h3>
+    <div style="text-align:center">
+      <img src="vscode开发平台.png" alt="VSCode开发平台" style="max-width:100%;border-radius:8px;border:1px solid var(--border)" loading="lazy">
+    </div>
+  </div>
+
   <div class="grid2">
     <div class="panel">
       <h3>文件树 (User/应用层)</h3>
@@ -1397,6 +1463,73 @@ main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px}
       <div class="panel stat-card green"><div class="value">8</div><div class="label">用户源文件</div></div>
       <div class="panel stat-card purple"><div class="value">3</div><div class="label">串口 (USART1/2/3)</div></div>
     </div>
+  </div>
+</section>
+
+
+<!-- ==================== 实物展示 ==================== -->
+<section class="section" id="tab-gallery">
+  <div class="section-title">📷 实物展示 — 硬件、PCB、外壳与开发环境</div>
+  <div class="section-desc">以下是项目各阶段产出的实物照片与设计图。点击图片可在新窗口查看原图。</div>
+
+  <div class="grid2" style="margin-bottom:18px;">
+    <div class="panel">
+      <h3>🛡 外壳结构设计 (Sharp3D)</h3>
+      <a href="外壳sharp3D建模图.png" target="_blank"><img src="外壳sharp3D建模图.png" alt="外壳Sharp3D建模" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:pointer" loading="lazy"></a>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px">三防外壳设计，面向野外导线覆冰观测场景</div>
+    </div>
+    <div class="panel">
+      <h3>💻 开发环境 (VS Code + Keil)</h3>
+      <a href="vscode开发平台.png" target="_blank"><img src="vscode开发平台.png" alt="VSCode开发平台" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:pointer" loading="lazy"></a>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px">VS Code 编辑器 + Keil MDK 编译工具链</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:18px;">
+    <div class="panel">
+      <h3>📟 PCB 底板设计图</h3>
+      <a href="PCB底板.png" target="_blank"><img src="PCB底板.png" alt="PCB底板" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:pointer" loading="lazy"></a>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px">集成 STM32 + Air780e + TAU1201 的底板PCB Layout</div>
+    </div>
+    <div class="panel">
+      <h3>📟 最小系统板 PCB</h3>
+      <a href="PCB最小系统板.jpg" target="_blank"><img src="PCB最小系统板.jpg" alt="PCB最小系统板" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:pointer" loading="lazy"></a>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px">STM32F103C8T6 最小系统板</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:18px;">
+    <div class="panel">
+      <h3>⚡ DC-DC 4.7-12V → 3.9V 电源电路</h3>
+      <a href="DC-DC4.7-12V转3.9V电路.png" target="_blank"><img src="DC-DC4.7-12V转3.9V电路.png" alt="DC-DC 4.7-12V转3.9V" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:pointer" loading="lazy"></a>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px">宽电压输入降压电路，适配野外电池供电</div>
+    </div>
+    <div class="panel">
+      <h3>⚡ DC-DC 5V → 3.3V 电源电路</h3>
+      <a href="DC-DC5V转3.3V电路.png" target="_blank"><img src="DC-DC5V转3.3V电路.png" alt="DC-DC 5V转3.3V" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:pointer" loading="lazy"></a>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px">二级降压电路，为MCU及外设提供稳定3.3V</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:18px;">
+    <div class="panel">
+      <h3>📡 MQTTBox 数据接收验证</h3>
+      <a href="mqttbox数据接收示例图.png" target="_blank"><img src="mqttbox数据接收示例图.png" alt="MQTTBox数据接收" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:pointer" loading="lazy"></a>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px">订阅 /BEIDOU001/datas 主题实时接收定位JSON数据</div>
+    </div>
+    <div class="panel">
+      <h3>🔬 部分原理图</h3>
+      <a href="部分原理图.png" target="_blank"><img src="部分原理图.png" alt="部分原理图" style="width:100%;border-radius:8px;border:1px solid var(--border);cursor:pointer" loading="lazy"></a>
+      <div style="font-size:11px;color:var(--text2);margin-top:6px">系统部分电路原理图设计</div>
+    </div>
+  </div>
+
+  <div class="panel full">
+    <h3>📐 最小系统板 3D 视图</h3>
+    <div style="text-align:center">
+      <a href="最小系统版3D.jpg" target="_blank"><img src="最小系统版3D.jpg" alt="最小系统板3D" style="max-width:100%;max-height:500px;border-radius:8px;border:1px solid var(--border);cursor:pointer" loading="lazy"></a>
+    </div>
+    <div style="font-size:11px;color:var(--text2);margin-top:6px;text-align:center">PCB 3D 预览视图</div>
   </div>
 </section>
 
