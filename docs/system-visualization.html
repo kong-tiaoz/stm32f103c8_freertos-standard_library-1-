@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>北斗定位+4G终端 — STM32F103C8T6 FreeRTOS 系统可视化平台</title>
+<title>北斗导线覆冰观测系统 — 答辩技术栈可视化平台</title>
 <style>
 :root {
   --bg: #0a0e17;
@@ -17,207 +17,216 @@
   --pink: #ec4899;
   --text: #e2e8f0;
   --text2: #94a3b8;
-  --font: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-  --mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  --font: 'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+  --mono: 'Cascadia Code','Fira Code','JetBrains Mono','Consolas',monospace;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { background:var(--bg); color:var(--text); font-family:var(--font); overflow-x:hidden; }
-canvas#bgCanvas { position:fixed; top:0; left:0; z-index:0; pointer-events:none; opacity:0.3; }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:var(--font);overflow-x:hidden}
+canvas#bgCanvas{position:fixed;top:0;left:0;z-index:0;pointer-events:none;opacity:0.3}
 
-header {
-  position:sticky; top:0; z-index:100;
-  background:rgba(17,24,39,0.92); backdrop-filter:blur(12px);
-  border-bottom:1px solid var(--border); padding:12px 28px;
-  display:flex; align-items:center; justify-content:space-between;
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(17,24,39,0.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);padding:12px 28px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px
 }
-header .logo { font-size:20px; font-weight:700; letter-spacing:0.5px; }
-header .logo span.sat { color:var(--accent); }
-header .logo span.chip { color:var(--accent2); }
-nav { display:flex; gap:4px; flex-wrap:wrap; }
-nav button {
-  background:transparent; border:1px solid transparent; color:var(--text2);
-  padding:6px 14px; border-radius:6px; cursor:pointer; font-size:13px; transition:all .2s;
+header .logo{font-size:20px;font-weight:700;letter-spacing:0.5px}
+header .logo span.sat{color:var(--accent)}
+header .logo span.chip{color:var(--accent2)}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+nav button{
+  background:transparent;border:1px solid transparent;color:var(--text2);
+  padding:6px 14px;border-radius:6px;cursor:pointer;font-size:13px;transition:all .2s;white-space:nowrap
 }
-nav button:hover, nav button.active {
-  color:var(--accent); border-color:var(--accent); background:rgba(0,212,255,0.06);
-}
+nav button:hover,nav button.active{color:var(--accent);border-color:var(--accent);background:rgba(0,212,255,0.06)}
 
-main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20px; }
-.section { display:none; }
-.section.active { display:block; }
-.section-title { font-size:22px; font-weight:700; margin-bottom:18px; color:var(--accent); letter-spacing:0.5px; }
-.section-desc { color:var(--text2); font-size:13px; margin-bottom:20px; line-height:1.6; }
+main{position:relative;z-index:1;max-width:1400px;margin:0 auto;padding:20px}
+.section{display:none}
+.section.active{display:block}
+.section-title{font-size:22px;font-weight:700;margin-bottom:8px;color:var(--accent);letter-spacing:0.5px}
+.section-subtitle{font-size:14px;color:var(--text2);margin-bottom:18px;line-height:1.6}
+.section-desc{color:var(--text2);font-size:13px;margin-bottom:20px;line-height:1.6}
 
-.grid2 { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
-.grid3 { display:grid; grid-template-columns:repeat(3,1fr); gap:18px; }
-.panel {
-  background:var(--panel); border:1px solid var(--border); border-radius:12px;
-  padding:20px; transition:all .3s;
-}
-.panel:hover { border-color:rgba(0,212,255,0.3); box-shadow:0 4px 24px rgba(0,212,255,0.04); }
-.panel h3 { font-size:15px; font-weight:600; margin-bottom:12px; color:var(--accent); }
-.panel.full { grid-column:1/-1; }
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.grid23{display:grid;grid-template-columns:2fr 1fr;gap:18px}
+.grid32{display:grid;grid-template-columns:1fr 2fr;gap:18px}
 
-/* Architecture Diagram */
-.arch-container { position:relative; min-height:420px; }
-.arch-box {
-  position:absolute; background:var(--panel); border:1px solid var(--border); border-radius:10px;
-  padding:12px 16px; text-align:center; font-size:12px; cursor:pointer;
-  transition:all .3s; z-index:1;
+.panel{
+  background:var(--panel);border:1px solid var(--border);border-radius:12px;
+  padding:20px;transition:all .3s
 }
-.arch-box:hover { transform:translateY(-3px); box-shadow:0 8px 32px rgba(0,0,0,0.4); z-index:10; }
-.arch-box.mcu { border-color:var(--accent2); left:50%; top:50%; transform:translate(-50%,-50%);
-  width:180px; padding:18px; background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(0,212,255,0.05)); }
-.arch-box.mcu:hover { transform:translate(-50%,-53%); border-color:var(--accent); }
-.arch-box.gps { border-color:var(--green); left:8%; top:15%; width:150px; }
-.arch-box.gps:hover { border-color:#34d399; }
-.arch-box.lte { border-color:var(--accent); right:8%; top:15%; width:150px; }
-.arch-box.lte:hover { border-color:#38bdf8; }
-.arch-box.cloud { border-color:var(--orange); right:8%; bottom:12%; width:150px; }
-.arch-box.debug { border-color:var(--pink); left:8%; bottom:12%; width:110px; }
-.arch-box.led { border-color:#fbbf24; left:25%; top:78%; width:80px; padding:8px; font-size:11px; }
-.arch-box.key { border-color:#a78bfa; left:45%; top:84%; width:80px; padding:8px; font-size:11px; }
-.arch-box .chip { font-weight:700; font-size:14px; display:block; }
-.arch-box .detail { color:var(--text2); font-size:10px; margin-top:4px; }
+.panel:hover{border-color:rgba(0,212,255,0.25);box-shadow:0 4px 24px rgba(0,212,255,0.04)}
+.panel h3{font-size:15px;font-weight:600;margin-bottom:12px;color:var(--accent)}
+.panel.full{grid-column:1/-1}
 
-/* connection lines canvas */
-#connCanvas { position:absolute; top:0; left:0; pointer-events:none; z-index:0; }
+/* Architecture */
+.arch-container{position:relative;min-height:420px}
+.arch-box{
+  position:absolute;background:var(--panel);border:1px solid var(--border);border-radius:10px;
+  padding:12px 16px;text-align:center;font-size:12px;cursor:pointer;
+  transition:all .3s;z-index:1
+}
+.arch-box:hover{transform:translateY(-3px);box-shadow:0 8px 32px rgba(0,0,0,0.4);z-index:10}
+.arch-box.mcu{border-color:var(--accent2);left:50%;top:50%;transform:translate(-50%,-50%);width:180px;padding:18px;background:linear-gradient(135deg,rgba(124,58,237,0.12),rgba(0,212,255,0.06))}
+.arch-box.mcu:hover{transform:translate(-50%,-53%);border-color:var(--accent)}
+.arch-box.gps{border-color:var(--green);left:8%;top:15%;width:150px}
+.arch-box.lte{border-color:var(--accent);right:8%;top:15%;width:150px}
+.arch-box.cloud{border-color:var(--orange);right:8%;bottom:12%;width:150px}
+.arch-box.debug{border-color:var(--pink);left:8%;bottom:12%;width:110px}
+.arch-box .chip{font-weight:700;font-size:14px;display:block}
+.arch-box .detail{color:var(--text2);font-size:10px;margin-top:4px}
+#connCanvas{position:absolute;top:0;left:0;pointer-events:none;z-index:0}
 
-/* Pin Map Table */
-.pin-table { width:100%; border-collapse:collapse; font-size:12px; }
-.pin-table th { background:rgba(0,212,255,0.08); color:var(--accent); padding:8px 12px; text-align:left;
-  border-bottom:1px solid var(--border); font-weight:600; }
-.pin-table td { padding:8px 12px; border-bottom:1px solid rgba(30,41,59,0.6); }
-.pin-table tr:hover td { background:rgba(0,212,255,0.03); }
-.pin-table .pin { font-family:var(--mono); color:var(--accent2); }
-.pin-table .func { color:var(--green); font-weight:500; }
+/* Pin Table */
+.pin-table{width:100%;border-collapse:collapse;font-size:12px}
+.pin-table th{background:rgba(0,212,255,0.08);color:var(--accent);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border);font-weight:600}
+.pin-table td{padding:8px 12px;border-bottom:1px solid rgba(30,41,59,0.6)}
+.pin-table tr:hover td{background:rgba(0,212,255,0.03)}
+.pin-table .pin{font-family:var(--mono);color:var(--accent2)}
+.pin-table .func{color:var(--green);font-weight:500}
 
-/* Task Timeline */
-.task-grid { display:flex; flex-direction:column; gap:8px; }
-.task-row {
-  display:flex; align-items:center; gap:12px; padding:10px 14px;
-  background:rgba(30,41,59,0.4); border-radius:8px; border-left:3px solid transparent;
-  cursor:pointer; transition:all .2s;
+/* Task Grid */
+.task-grid{display:flex;flex-direction:column;gap:8px}
+.task-row{
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+  background:rgba(30,41,59,0.4);border-radius:8px;border-left:3px solid transparent;
+  cursor:pointer;transition:all .2s
 }
-.task-row:hover { background:rgba(30,41,59,0.7); }
-.task-row.prio4 { border-left-color:var(--red); }
-.task-row.prio3 { border-left-color:var(--orange); }
-.task-row.prio1 { border-left-color:var(--green); }
-.task-row .tname { font-weight:600; width:150px; font-size:13px; }
-.task-row .tstack { color:var(--text2); width:70px; font-family:var(--mono); font-size:11px; }
-.task-row .tprio { width:60px; font-family:var(--mono); font-size:11px; }
-.task-bar {
-  flex:1; height:22px; background:rgba(30,41,59,0.8); border-radius:4px;
-  position:relative; overflow:hidden;
-}
-.task-bar-fill {
-  height:100%; border-radius:4px; position:absolute; opacity:0.7;
-  animation:taskPulse 3s ease-in-out infinite;
-}
-@keyframes taskPulse { 0%,100%{opacity:0.6} 50%{opacity:1} }
+.task-row:hover{background:rgba(30,41,59,0.7)}
+.task-row.prio4{border-left-color:var(--red)}
+.task-row.prio3{border-left-color:var(--orange)}
+.task-row.prio1{border-left-color:var(--green)}
+.task-row .tname{font-weight:600;width:150px;font-size:13px}
+.task-row .tstack{color:var(--text2);width:70px;font-family:var(--mono);font-size:11px}
+.task-row .tprio{width:60px;font-family:var(--mono);font-size:11px}
+.task-bar{flex:1;height:22px;background:rgba(30,41,59,0.8);border-radius:4px;position:relative;overflow:hidden}
+.task-bar-fill{height:100%;border-radius:4px;position:absolute;opacity:0.7;animation:taskPulse 3s ease-in-out infinite}
+@keyframes taskPulse{0%,100%{opacity:0.6}50%{opacity:1}}
 
-/* Data Flow Animation */
-.dataflow { position:relative; min-height:340px; display:flex; align-items:center; justify-content:center; }
-.flow-node {
-  padding:14px 20px; border-radius:10px; font-size:12px; text-align:center;
-  border:1px solid var(--border); background:var(--panel); position:relative;
+/* Data Flow */
+.dataflow{position:relative;min-height:100px;display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px;padding:12px 0}
+.flow-node{
+  padding:12px 18px;border-radius:10px;font-size:12px;text-align:center;
+  border:1px solid var(--border);background:var(--panel);position:relative
 }
-.flow-node.source { border-color:var(--green); }
-.flow-node.process { border-color:var(--accent2); }
-.flow-node.queue { border-color:var(--orange); }
-.flow-node.send { border-color:var(--accent); }
-.flow-node.cloud { border-color:var(--pink); }
-.flow-arrow {
-  width:40px; height:2px; position:relative;
-  animation:flowPulse 1.5s ease-in-out infinite;
+.flow-node.source{border-color:var(--green)}
+.flow-node.process{border-color:var(--accent2)}
+.flow-node.queue{border-color:var(--orange)}
+.flow-node.send{border-color:var(--accent)}
+.flow-node.cloud{border-color:var(--pink)}
+.flow-arrow{
+  width:40px;height:2px;position:relative;
+  animation:flowPulse 1.5s ease-in-out infinite
 }
-.flow-arrow::after {
-  content:''; position:absolute; right:-2px; top:-4px;
-  border:5px solid transparent; border-left-color:var(--accent);
+.flow-arrow::after{
+  content:'';position:absolute;right:-2px;top:-4px;
+  border:5px solid transparent;border-left-color:var(--accent)
 }
-@keyframes flowPulse {
-  0% { opacity:0.3; transform:scaleX(0.8); }
-  50% { opacity:1; transform:scaleX(1.1); }
-  100% { opacity:0.3; transform:scaleX(0.8); }
-}
-.particle {
-  position:absolute; width:6px; height:6px; border-radius:50%;
-  background:var(--accent); animation:particleMove 3s linear infinite;
-}
-@keyframes particleMove {
-  0% { left:5%; opacity:0; }
-  20% { opacity:1; }
-  80% { opacity:1; }
-  100% { left:95%; opacity:0; }
-}
+@keyframes flowPulse{0%{opacity:0.3;transform:scaleX(0.8)}50%{opacity:1;transform:scaleX(1.1)}100%{opacity:0.3;transform:scaleX(0.8)}}
 
-/* Code Viewer */
-.code-block {
-  background:#0d1117; border:1px solid var(--border); border-radius:8px;
-  padding:16px; overflow:auto; max-height:480px; font-family:var(--mono); font-size:12px;
-  line-height:1.7; white-space:pre; color:#c9d1d9; position:relative;
+/* Code Block */
+.code-block{
+  background:#0d1117;border:1px solid var(--border);border-radius:8px;
+  padding:16px;overflow:auto;max-height:480px;font-family:var(--mono);font-size:12px;
+  line-height:1.7;white-space:pre;color:#c9d1d9
 }
-.code-block .kw { color:#ff7b72; }
-.code-block .fn { color:#d2a8ff; }
-.code-block .str { color:#a5d6ff; }
-.code-block .num { color:#79c0ff; }
-.code-block .cmt { color:#8b949e; font-style:italic; }
-.code-block .pp { color:#7ee787; }
-.code-line { cursor:pointer; padding:0 8px; margin:0 -8px; border-radius:2px; display:block; }
-.code-line:hover { background:rgba(0,212,255,0.08); }
-.code-line.highlight { background:rgba(0,212,255,0.12); border-left:2px solid var(--accent); }
+.code-block .kw{color:#ff7b72}
+.code-block .fn{color:#d2a8ff}
+.code-block .str{color:#a5d6ff}
+.code-block .num{color:#79c0ff}
+.code-block .cmt{color:#8b949e;font-style:italic}
+.code-block .pp{color:#7ee787}
+.code-block .ty{color:#ffa657}
 
 /* State Machine */
-.state-machine { display:flex; flex-wrap:wrap; gap:8px; justify-content:center; align-items:center; }
-.sm-state {
-  padding:10px 16px; border-radius:8px; font-size:11px; text-align:center;
-  border:1px solid var(--border); background:var(--panel); cursor:pointer;
-  transition:all .2s; position:relative; min-width:80px;
+.state-machine{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;padding:8px 0}
+.sm-state{
+  padding:10px 14px;border-radius:8px;font-size:11px;text-align:center;
+  border:1px solid var(--border);background:var(--panel);cursor:pointer;
+  transition:all .2s;min-width:80px
 }
-.sm-state:hover { border-color:var(--accent); transform:translateY(-2px); }
-.sm-state.active-state { border-color:var(--green); background:rgba(16,185,129,0.1); }
-.sm-state.error-state { border-color:var(--red); }
-.sm-state.backoff { border-color:var(--orange); }
-.sm-arrow { color:var(--text2); font-size:18px; }
-.sm-arrow.alt { color:var(--orange); }
+.sm-state:hover{border-color:var(--accent);transform:translateY(-2px)}
+.sm-state.active-state{border-color:var(--green);background:rgba(16,185,129,0.1)}
+.sm-state.error-state{border-color:var(--red)}
+.sm-state.backoff{border-color:var(--orange)}
+.sm-arrow{color:var(--text2);font-size:16px}
+.sm-arrow.alt{color:var(--orange)}
 
-/* Info tooltip */
-.tooltip {
-  position:fixed; z-index:200; background:var(--panel); border:1px solid var(--accent);
-  border-radius:8px; padding:12px 16px; font-size:12px; max-width:320px;
-  pointer-events:none; opacity:0; transition:opacity .15s; box-shadow:0 8px 32px rgba(0,0,0,0.5);
+/* Tooltip */
+.tooltip{
+  position:fixed;z-index:200;background:var(--panel);border:1px solid var(--accent);
+  border-radius:8px;padding:12px 16px;font-size:12px;max-width:360px;
+  pointer-events:none;opacity:0;transition:opacity .15s;box-shadow:0 8px 32px rgba(0,0,0,0.5);line-height:1.6
 }
-.tooltip.show { opacity:1; }
+.tooltip.show{opacity:1}
 
-/* Stats */
-.stat-card { text-align:center; padding:16px; }
-.stat-card .value { font-size:36px; font-weight:700; font-family:var(--mono); }
-.stat-card .label { color:var(--text2); font-size:12px; margin-top:4px; }
-.stat-card.accent .value { color:var(--accent); }
-.stat-card.green .value { color:var(--green); }
-.stat-card.purple .value { color:var(--accent2); }
-.stat-card.orange .value { color:var(--orange); }
+/* Stat Card */
+.stat-card{text-align:center;padding:16px}
+.stat-card .value{font-size:30px;font-weight:700;font-family:var(--mono)}
+.stat-card .label{color:var(--text2);font-size:12px;margin-top:4px}
+.stat-card.accent .value{color:var(--accent)}
+.stat-card.green .value{color:var(--green)}
+.stat-card.purple .value{color:var(--accent2)}
+.stat-card.orange .value{color:var(--orange)}
 
-/* Sync diagram */
-.sync-diagram { display:flex; flex-direction:column; gap:6px; font-size:12px; }
-.sync-step { display:flex; align-items:center; gap:10px; padding:8px 12px;
-  background:rgba(30,41,59,0.4); border-radius:6px; }
-.sync-step .step-num { width:24px; height:24px; border-radius:50%; background:var(--accent2);
-  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:11px; flex-shrink:0; }
-.sync-step .step-desc { flex:1; }
-.sync-step .step-actor { color:var(--accent); font-weight:600; width:90px; flex-shrink:0; }
+/* Sync Diagram */
+.sync-diagram{display:flex;flex-direction:column;gap:6px;font-size:12px}
+.sync-step{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(30,41,59,0.4);border-radius:6px}
+.sync-step .step-num{width:24px;height:24px;border-radius:50%;background:var(--accent2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:11px;flex-shrink:0}
+.sync-step .step-desc{flex:1}
+.sync-step .step-actor{color:var(--accent);font-weight:600;width:90px;flex-shrink:0}
 
-/* Tab content animation */
-@keyframes fadeSlide { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-.section.active { animation:fadeSlide .4s ease-out; }
+/* Timing Diagram */
+.timing-container{position:relative;overflow-x:auto;padding:8px 0}
+.timing-row{display:flex;align-items:center;margin-bottom:12px;min-width:900px}
+.timing-label{width:130px;font-weight:600;font-size:12px;flex-shrink:0;text-align:right;padding-right:12px}
+.timing-track{flex:1;height:36px;background:rgba(30,41,59,0.5);border-radius:4px;position:relative}
+.timing-block{position:absolute;height:100%;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;cursor:pointer;transition:all .2s}
+.timing-block:hover{filter:brightness(1.3);z-index:5}
+.timing-block.gps-c{background:rgba(16,185,129,0.3);border:1px solid var(--green);color:var(--green)}
+.timing-block.gps-w{background:rgba(16,185,129,0.1);border:1px dashed var(--green);color:var(--text2)}
+.timing-block.mqtt-c{background:rgba(0,212,255,0.3);border:1px solid var(--accent);color:var(--accent)}
+.timing-block.mqtt-w{background:rgba(0,212,255,0.1);border:1px dashed var(--accent);color:var(--text2)}
+.timing-block.log{background:rgba(236,72,153,0.2);border:1px solid var(--pink);color:var(--pink)}
+.timing-marker{position:absolute;top:0;width:1px;height:100%;background:var(--text2);opacity:0.3}
+.timing-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:11px;color:var(--text2)}
 
-/* Scrollbar */
-::-webkit-scrollbar { width:6px; height:6px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+/* Highlight Box */
+.highlight-box{
+  background:rgba(0,212,255,0.06);border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;padding:12px 16px;margin:12px 0;font-size:12px;line-height:1.7
+}
+.highlight-box.green{border-left-color:var(--green);background:rgba(16,185,129,0.06)}
+.highlight-box.orange{border-left-color:var(--orange);background:rgba(245,158,11,0.06)}
+.highlight-box.red{border-left-color:var(--red);background:rgba(239,68,68,0.06)}
+.highlight-box.purple{border-left-color:var(--accent2);background:rgba(124,58,237,0.06)}
 
-/* Responsive */
-@media(max-width:900px){ .grid2,.grid3{grid-template-columns:1fr;} .arch-container{min-height:320px} }
+/* Tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;margin-right:4px}
+.tag.green{background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3)}
+.tag.blue{background:rgba(0,212,255,0.15);color:var(--accent);border:1px solid rgba(0,212,255,0.3)}
+.tag.purple{background:rgba(124,58,237,0.15);color:var(--accent2);border:1px solid rgba(124,58,237,0.3)}
+.tag.orange{background:rgba(245,158,11,0.15);color:var(--orange);border:1px solid rgba(245,158,11,0.3)}
+.tag.pink{background:rgba(236,72,153,0.15);color:var(--pink);border:1px solid rgba(236,72,153,0.3)}
+.tag.red{background:rgba(239,68,68,0.15);color:var(--red);border:1px solid rgba(239,68,68,0.3)}
+
+/* Collapsible */
+.collapsible{cursor:pointer;user-select:none}
+.collapsible::after{content:' ▼';font-size:10px;color:var(--text2)}
+.collapsible.open::after{content:' ▲'}
+
+/* Animations */
+@keyframes fadeSlide{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.section.active{animation:fadeSlide .4s ease-out}
+@keyframes glowPulse{0%,100%{box-shadow:0 0 8px rgba(0,212,255,0.2)}50%{box-shadow:0 0 20px rgba(0,212,255,0.5)}}
+.glow{animation:glowPulse 2s ease-in-out infinite}
+
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+@media(max-width:900px){.grid2,.grid3,.grid23,.grid32{grid-template-columns:1fr}.arch-container{min-height:320px}}
 </style>
 </head>
 <body>
@@ -225,9 +234,10 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
 <canvas id="bgCanvas"></canvas>
 
 <header>
-  <div class="logo"><span class="sat">◆ 北斗</span> & <span class="chip">4G</span> 嵌入式定位终端</div>
+  <div class="logo"><span class="sat">◆ 北斗</span>导线覆冰观测<span class="chip">前端装置</span></div>
   <nav id="navbar">
-    <button data-tab="overview" class="active">系统概览</button>
+    <button data-tab="defense" class="active">🎓 答辩讲解</button>
+    <button data-tab="overview">系统概览</button>
     <button data-tab="hardware">硬件原理图</button>
     <button data-tab="tasks">任务调度</button>
     <button data-tab="dataflow">数据流</button>
@@ -239,8 +249,595 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
 
 <main>
 
-<!-- ===================== 系统概览 ===================== -->
-<section class="section active" id="tab-overview">
+<!-- ==================== 答辩讲解 ==================== -->
+<section class="section active" id="tab-defense">
+  <div class="section-title">🎓 答辩技术栈讲解</div>
+  <div class="section-subtitle">
+    本项目面向<b>产品级</b>导线覆冰监测需求，在STM32F103C8T6（Cortex-M3, 72MHz, 20KB RAM）上构建了基于FreeRTOS的实时嵌入式系统。
+    以下按技术栈逐一讲解核心设计。
+  </div>
+
+  <!-- ===== 0. 系统核心架构 ===== -->
+  <div class="panel full" style="position:relative;min-height:440px;margin-bottom:18px">
+    <h3>0. 系统核心架构 — 硬件拓扑 + 软件分层</h3>
+    <div class="arch-container" id="archContainerDefense">
+      <canvas id="connCanvasDefense"></canvas>
+
+      <div class="arch-box mcu" data-tip="<b>STM32F103C8T6</b> 主控<br>ARM Cortex-M3 @ 72MHz<br>64KB Flash | 20KB SRAM<br>FreeRTOS V9.0.0 · heap_4<br>5任务 · 3队列 · 1信号量" data-code="main.c:154 / mycode.c:528">
+        <span class="chip">🔲 STM32F103C8T6</span>
+        <div class="detail">Cortex-M3 @ 72MHz<br>FreeRTOS V9.0.0<br>16KB堆 · 5任务</div>
+      </div>
+
+      <div class="arch-box gps" data-tip="<b>TAU1201</b> 北斗/GPS双模模块<br>USART3 · PB10(TX)/PB11(RX) · 115200bps<br>仅输出 $GNGGA 语句<br>专有UBX二进制配置协议" data-code="mycode.c:82-192">
+        <span class="chip">🛰 TAU1201</span>
+        <div class="detail">北斗/GPS 双模定位<br>USART3 · 115200bps<br>仅保留 GGA 输出</div>
+      </div>
+
+      <div class="arch-box lte" data-tip="<b>Air780e</b> 4G Cat.1 模块<br>USART2 · PA2(TX)/PA3(RX) · 115200bps<br>PB0(PWR) · PB1(RST) 控制<br>AT指令 · MQTT Client · 合宙固件" data-code="Air780e.c:62-527">
+        <span class="chip">📶 Air780e</span>
+        <div class="detail">4G Cat.1 通信模块<br>USART2 · AT指令<br>MQTT Client</div>
+      </div>
+
+      <div class="arch-box cloud" data-tip="<b>MQTT Broker</b><br>8.136.109.126:1883<br>mosquitto 开源服务器<br>认证: mosquitto / hfut<br>主题: /BEIDOU001/datas<br>/BEIDOU001/cmd/time" data-code="mycode.c:471">
+        <span class="chip">☁️ MQTT Broker</span>
+        <div class="detail">8.136.109.126:1883<br>mosquitto<br>/BEIDOU001/datas</div>
+      </div>
+
+      <div class="arch-box debug" data-tip="<b>调试串口</b> USART1<br>PA9(TX)/PA10(RX) · 115200bps<br>异步日志: FreeRTOS队列 + Log_Task<br>全局开关: g_log_output_enabled" data-code="bsp_usart.c:36-70">
+        <span class="chip">🔌 调试串口</span>
+        <div class="detail">USART1 · PA9/PA10<br>异步日志输出<br>LOG_PRINT 宏</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:12px">
+      <div style="font-size:11px;color:var(--text2)">
+        <span class="tag green">TAU1201→MCU</span> USART3 · RXNE中断 · gpsQueue(512B) · GPS_TASK prio4<br>
+        <span class="tag blue">MCU→Air780e</span> USART2 · AT指令 · Air780e_StateMachine() · MQTT_APP prio3<br>
+        <span class="tag orange">Air780e→Cloud</span> 4G LTE · MQTT · QoS1 · 指数退避重连 · 3条离线缓存<br>
+        <span class="tag pink">MCU→PC</span> USART1 · 异步LOG_PRINT · Log_Task prio1
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 1. 串口高吞吐处理方案 ===== -->
+  <div class="panel full" style="margin-bottom:18px">
+    <h3>1. 串口高吞吐处理方案 — 三管齐下对抗资源瓶颈</h3>
+    <div class="section-desc" style="margin-bottom:12px">
+      STM32F103C8T6仅<b>20KB RAM</b>，而TAU1201以115200bps持续输出NMEA数据时，每秒约1.5KB。
+      若不加控制，数秒内就会耗尽内存。以下三重优化确保系统稳定运行。
+    </div>
+
+    <div class="grid3" style="margin-bottom:16px">
+      <div class="panel" style="border-left:3px solid var(--green)">
+        <h3 style="color:var(--green)">策略一：按需开关串口</h3>
+        <div style="font-size:12px;line-height:1.7;color:var(--text2)">
+          <b>非采样期直接关闭USART3</b>，包括外设时钟和RXNE中断。
+          仅在接收到信号量后才使能串口，一条GGA采完立即关闭。
+          中断开销从"持续存在"降为"窗口触发"。
+        </div>
+        <div class="code-block" style="height:120px;margin-top:8px;font-size:11px">
+<span class="cmt">// mycode.c:139-160  GPS_Enable / GPS_Disable</span>
+<span class="kw">static void</span> <span class="fn">GPS_Disable</span>(<span class="kw">void</span>) {
+    USART_Cmd(GPS_USART, DISABLE);
+    USART_ITConfig(GPS_USART, USART_IT_RXNE, DISABLE);
+}
+
+<span class="kw">static void</span> <span class="fn">GPS_Enable</span>(<span class="kw">void</span>) {
+    <span class="cmt">// 先清空SR/DR和队列中的残留数据</span>
+    <span class="kw">volatile uint16_t</span> sr = GPS_USART->SR;
+    <span class="kw">volatile uint16_t</span> dr = GPS_USART->DR;
+    (<span class="kw">void</span>)sr; (<span class="kw">void</span>)dr;
+    xQueueReset(gpsQueue);  <span class="cmt">// 清旧数据</span>
+    USART_ITConfig(GPS_USART, USART_IT_RXNE, ENABLE);
+    USART_Cmd(GPS_USART, ENABLE);
+}
+</div>
+      </div>
+
+      <div class="panel" style="border-left:3px solid var(--accent2)">
+        <h3 style="color:var(--accent2)">策略二：仅保留GGA语句</h3>
+        <div style="font-size:12px;line-height:1.7;color:var(--text2)">
+          TAU1201默认输出10种NMEA语句（GGA/GLL/GSA/GSV/RMC/VTG/ZDA/GST/TXT等）。
+          上电后发送<b>10条专有二进制配置指令</b>关闭所有无关输出，数据量降低约<b>90%</b>。
+        </div>
+        <div class="code-block" style="height:120px;margin-top:8px;font-size:11px">
+<span class="cmt">// mycode.c:67-76  UBX协议二进制指令集</span>
+<span class="kw">const uint8_t</span> close_gll[] = {<span class="num">0xF1,0xD9,0x06,0x01,0x03,0x00,0xF0,0x01,0x00,0xFB,0x11</span>};
+<span class="kw">const uint8_t</span> close_gsa[] = {<span class="num">0xF1,0xD9,0x06,0x01,0x03,0x00,0xF0,0x02,0x00,0xFC,0x13</span>};
+<span class="kw">const uint8_t</span> close_rmc[] = {<span class="num">0xF1,0xD9,0x06,0x01,0x03,0x00,0xF0,0x05,0x00,0xFF,0x19</span>};
+<span class="cmt">// ... 共10条指令，逐条发送，每条约11字节</span>
+<span class="cmt">// TAU1201_Config() 连续发送，间隔50ms</span>
+</div>
+      </div>
+
+      <div class="panel" style="border-left:3px solid var(--red)">
+        <h3 style="color:var(--red)">策略三：ISR错误处理防死锁</h3>
+        <div style="font-size:12px;line-height:1.7;color:var(--text2)">
+          高速串口易发生<b>ORE溢出错误</b>，若ISR只处理RXNE不处理ORE，MCU将陷入无限中断循环。
+          同时检查所有错误标志，错误字节丢弃但<b>标志位被安全清除</b>。
+        </div>
+        <div class="code-block" style="height:130px;margin-top:8px;font-size:11px">
+<span class="cmt">// mycode.c:199-224  USART3_IRQHandler</span>
+<span class="kw">void</span> <span class="fn">USART3_IRQHandler</span>(<span class="kw">void</span>) {
+    <span class="kw">volatile uint16_t</span> sr = GPS_USART->SR;
+    <span class="kw">if</span>(USART_GetITStatus(GPS_USART,USART_IT_RXNE)!=RESET||
+       (sr&(USART_FLAG_ORE|USART_FLAG_NE|
+            USART_FLAG_FE|USART_FLAG_PE))!=<span class="num">0</span>){
+        <span class="kw">uint8_t</span> ch=USART_ReceiveData(GPS_USART);
+        <span class="kw">if</span>((sr&(USART_FLAG_ORE|USART_FLAG_NE|
+              USART_FLAG_FE|USART_FLAG_PE))==<span class="num">0</span>){
+            xQueueSendFromISR(gpsQueue,&ch,&xHPTW);
+        }<span class="kw">else</span>{<span class="cmt">/* 丢弃错误字节，标志已清除 */</span>}
+        portYIELD_FROM_ISR(xHPTW);
+    }
+}
+</div>
+      </div>
+    </div>
+
+    <div class="grid3">
+      <div class="panel stat-card green"><div class="value" style="font-size:22px">512×1B</div><div class="label">gpsQueue 深度</div></div>
+      <div class="panel stat-card purple"><div class="value" style="font-size:22px">~90%</div><div class="label">数据量削减</div></div>
+      <div class="panel stat-card accent"><div class="value" style="font-size:22px">115200</div><div class="label">波特率 (bps)</div></div>
+    </div>
+  </div>
+
+  <!-- ===== 2. 4G通信状态机与自愈重连 ===== -->
+  <div class="panel full" style="margin-bottom:18px">
+    <h3>2. 4G通信状态机与自愈重连 — 面向野外无人值守的产品级设计</h3>
+    <div class="section-desc" style="margin-bottom:12px">
+      Air780e驱动核心是一个包含<b>13个状态</b>的非阻塞状态机，每10ms轮询一次。
+      内置指数退避重连、致命错误检测、硬件复位、离线消息缓存四种自愈机制。
+    </div>
+
+    <div class="state-machine" style="padding:12px 0;overflow-x:auto;flex-wrap:nowrap;justify-content:flex-start">
+      <div class="sm-state" data-state="power_off">POWER_OFF<br><span style="color:var(--text2);font-size:9px">关机态</span></div>
+      <span class="sm-arrow">→</span>
+      <div class="sm-state" data-state="init_reset">INIT_RESET<br><span style="color:var(--text2);font-size:9px">AT+IPR/RESET</span></div>
+      <span class="sm-arrow">→</span>
+      <div class="sm-state" data-state="check_csq">CHECK_CSQ<br><span style="color:var(--text2);font-size:9px">信号质量</span></div>
+      <span class="sm-arrow">→</span>
+      <div class="sm-state" data-state="check_ccid">CHECK_CCID<br><span style="color:var(--text2);font-size:9px">SIM卡检测</span></div>
+      <span class="sm-arrow">→</span>
+      <div class="sm-state" data-state="check_cgreg">CHECK_CGREG<br><span style="color:var(--text2);font-size:9px">网络注册</span></div>
+      <span class="sm-arrow">→</span>
+      <div class="sm-state" data-state="check_cgatt">CHECK_CGATT<br><span style="color:var(--text2);font-size:9px">GPRS附着</span></div>
+      <span class="sm-arrow">→</span>
+      <div class="sm-state" data-state="mqtt_config">MQTT_CONFIG<br><span style="color:var(--text2);font-size:9px">AT+MCONFIG</span></div>
+      <span class="sm-arrow">→</span>
+      <div class="sm-state" data-state="mqtt_mipstart">MIPSTART<br><span style="color:var(--text2);font-size:9px">TCP握手</span></div>
+      <span class="sm-arrow">→</span>
+      <div class="sm-state" data-state="mqtt_mconnect">MCONNECT<br><span style="color:var(--text2);font-size:9px">MQTT握手</span></div>
+      <span class="sm-arrow">→</span>
+      <div class="sm-state" data-state="mqtt_msub">MSUB<br><span style="color:var(--text2);font-size:9px">订阅主题</span></div>
+      <span class="sm-arrow">→</span>
+      <div class="sm-state active-state glow" data-state="mqtt_connected">CONNECTED<br><span style="color:var(--text2);font-size:9px">✅ 就绪</span></div>
+    </div>
+
+    <div style="text-align:center;margin:12px 0">
+      <span style="color:var(--text2);font-size:12px">任一状态失败 →</span>
+      <span class="tag orange">WAIT_BACKOFF</span>
+      <span style="color:var(--text2);font-size:12px">: 指数退避 2s→4s→8s→16s→32s→60s(max) → 重试CHECK_CSQ</span><br>
+      <span style="color:var(--text2);font-size:12px">连续失败5次 →</span>
+      <span class="tag red">ERROR</span>
+      <span style="color:var(--text2);font-size:12px">: 10秒后硬件复位 → 重新开始</span>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="code-block" style="height:200px">
+<span class="cmt">// Air780e.c:285-307  指数退避核心算法</span>
+<span class="kw">static void</span> <span class="fn">HandleConnectionError</span>(<span class="kw">void</span>)
+{
+    s_ctx.error_count++;
+    LOG_PRINT(<span class="str">"[Air780e] Error count: %d. Backoff...\r\n"</span>,
+              s_ctx.error_count);
+
+    <span class="kw">if</span> (s_ctx.is_connected) {
+        s_ctx.is_connected = <span class="num">false</span>;
+        TriggerEvent(AIR780E_MQTT_EVENT_DISCONNECTED, NULL);
+    }
+
+    <span class="kw">if</span> (s_ctx.error_count > <span class="num">5</span>) {
+        <span class="cmt">// 连续5次失败 → 硬件复位</span>
+        LOG_PRINT(<span class="str">"Too many errors, HW reset.\r\n"</span>);
+        Air780e_HardwareReset();
+    } <span class="kw">else</span> {
+        <span class="cmt">// 指数退避: 2s→4s→8s→...→60s(max)</span>
+        s_ctx.backoff_delay_ms *= <span class="num">2</span>;
+        <span class="kw">if</span> (s_ctx.backoff_delay_ms > <span class="num">60000</span>)
+            s_ctx.backoff_delay_ms = <span class="num">60000</span>;
+        s_ctx.error_tick = xTaskGetTickCount()*portTICK_PERIOD_MS;
+        s_ctx.state = AIR780E_STATE_WAIT_BACKOFF;
+    }
+}
+</div>
+      </div>
+      <div>
+        <div class="highlight-box green" style="margin-top:0">
+          <b>🛡 四重自愈机制：</b><br>
+          ① <b>指数退避</b>：避免频繁重连耗尽4G模块资源<br>
+          ② <b>致命错误检测</b>：双重监控RDY/CLOSED/DISCONNECT/+CME ERROR:767<br>
+          ③ <b>硬件复位</b>：连续5次失败触发RST引脚复位<br>
+          ④ <b>离线缓存</b>：3条环形缓存，重连后MqttCache_Flush自动补发
+        </div>
+        <div class="highlight-box orange">
+          <b>⚡ 致命错误四剑客 (Air780e.c:263-273)：</b><br>
+          <code>RDY</code> — 模块异常重启就绪<br>
+          <code>CLOSED</code> — TCP连接被服务端关闭<br>
+          <code>DISCONNECT</code> — MQTT层断连<br>
+          <code>+CME ERROR: 767</code> — MQTT无连接状态
+        </div>
+        <div class="code-block" style="height:110px">
+<span class="cmt">// Air780e.c:530-533  连接状态查询</span>
+<span class="kw">bool</span> <span class="fn">Air780e_IsConnected</span>(<span class="kw">void</span>) {
+    <span class="kw">return</span> s_ctx.is_connected;
+}
+<span class="cmt">// GPS任务阻塞等待该标志为true后才开始采集</span>
+</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 3. FreeRTOS任务调度与时序 ===== -->
+  <div class="panel full" style="margin-bottom:18px">
+    <h3>3. FreeRTOS实时调度 — 任务优先级设计与采集-发送流水线时序</h3>
+
+    <div class="grid23" style="margin-bottom:16px">
+      <div class="panel">
+        <h3>任务优先级阶梯 (5级抢占)</h3>
+        <div class="task-grid">
+          <div class="task-row prio4">
+            <div class="tname">🛰 GPS_TASK</div>
+            <div class="tprio">Prio 4</div>
+            <div class="tstack">栈256B</div>
+            <div class="task-bar"><div class="task-bar-fill" style="width:35%;background:var(--red)"></div></div>
+          </div>
+          <div class="task-row prio4">
+            <div class="tname">⏱ Timer Service</div>
+            <div class="tprio">Prio 4</div>
+            <div class="tstack">栈256B</div>
+            <div class="task-bar"><div class="task-bar-fill" style="width:5%;background:var(--red)"></div></div>
+          </div>
+          <div class="task-row prio3">
+            <div class="tname">📶 MQTT_APP</div>
+            <div class="tprio">Prio 3</div>
+            <div class="tstack">栈384B</div>
+            <div class="task-bar"><div class="task-bar-fill" style="width:45%;background:var(--orange)"></div></div>
+          </div>
+          <div class="task-row prio1">
+            <div class="tname">📝 Log_Task</div>
+            <div class="tprio">Prio 1</div>
+            <div class="tstack">栈128B</div>
+            <div class="task-bar"><div class="task-bar-fill" style="width:10%;background:var(--green)"></div></div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.6">
+          <b>设计原则：</b><br>
+          · GPS_TASK最高优先级(4)：串口数据实时性要求最高<br>
+          · MQTT_APP次高优先级(3)：大量阻塞等待，可被GPS抢占<br>
+          · Log_Task最低优先级(1)：丢日志不影响系统功能<br>
+          · 总堆大小：16KB (heap_4)，所有任务和队列从中分配
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>信号量流水线同步机制</h3>
+        <div class="sync-diagram">
+          <div class="sync-step">
+            <div class="step-num">1</div><div class="step-actor">GPS_TASK</div>
+            <div class="step-desc"><b>xSemaphoreTake</b>(gpsCaptureSync, ∞) → <b>GPS_Enable()</b> → 采集一条GGA → 解析→JSON → xQueueSend(mqttPublishQueue) → <b>GPS_Disable()</b></div>
+          </div>
+          <div class="sync-step">
+            <div class="step-num">2</div><div class="step-actor">MQTT_APP</div>
+            <div class="step-desc">xQueueReceive(mqttPublishQueue) → <b>AT+MPUB</b> 发送 → 最多重试3次 → <b>xSemaphoreGive</b>(gpsCaptureSync)</div>
+          </div>
+          <div class="sync-step">
+            <div class="step-num">3</div><div class="step-actor">GPS_TASK</div>
+            <div class="step-desc">信号量被释放 → 立即开始下一轮采集 (循环)</div>
+          </div>
+        </div>
+        <div class="highlight-box green" style="margin-top:12px">
+          <b>设计优势：</b>实现"一收一发"节奏控制，避免GPS串口长时间开放。<br>
+          <b>初始启动：</b>GPS_TASK在4G连接成功后主动xSemaphoreGive启动流水线。<br>
+          <b>离线保护：</b>4G断网时消息自动进入3条环形缓存，重连后Flush补发。
+        </div>
+      </div>
+    </div>
+
+    <!-- Task Timing Diagram -->
+    <div class="panel full">
+      <h3>任务时序图 — GPS采集→MQTT发送→信号量同步 完整周期</h3>
+      <div style="font-size:11px;color:var(--text2);margin-bottom:10px">
+        时间轴展示一个完整采集-发送周期。GPS_TASK在信号量上阻塞，MQTT_APP发送成功后释放信号量。
+      </div>
+      <div class="timing-container">
+        <!-- Time axis -->
+        <div class="timing-row" style="margin-bottom:4px">
+          <div class="timing-label" style="font-size:10px;color:var(--text2)">时间轴</div>
+          <div class="timing-track" style="height:20px;background:transparent;position:relative">
+            <span style="position:absolute;left:0;font-size:9px;color:var(--text2)">0s</span>
+            <span style="position:absolute;left:18%;font-size:9px;color:var(--text2)">1s</span>
+            <span style="position:absolute;left:36%;font-size:9px;color:var(--text2)">2s</span>
+            <span style="position:absolute;left:54%;font-size:9px;color:var(--text2)">3s</span>
+            <span style="position:absolute;left:72%;font-size:9px;color:var(--text2)">4s</span>
+            <span style="position:absolute;left:90%;font-size:9px;color:var(--text2)">5s</span>
+          </div>
+        </div>
+
+        <!-- GPS_TASK -->
+        <div class="timing-row">
+          <div class="timing-label" style="color:var(--green)">🛰 GPS_TASK<br><span style="font-size:9px;color:var(--text2)">Prio 4</span></div>
+          <div class="timing-track">
+            <div class="timing-block gps-w" style="left:0;width:15%" title="等待4G连接">等待4G连接</div>
+            <div class="timing-block gps-c" style="left:16%;width:8%" title="配置TAU1201">配置</div>
+            <div class="timing-block gps-w" style="left:25%;width:10%" title="Take信号量">等信号量</div>
+            <div class="timing-block gps-c" style="left:36%;width:5%" title="使能USART3+采集GGA">采集</div>
+            <div class="timing-block gps-c" style="left:42%;width:4%" title="解析+JSON">解析</div>
+            <div class="timing-block gps-w" style="left:47%;width:22%" title="等信号量">等信号量</div>
+            <div class="timing-block gps-c" style="left:70%;width:5%" title="采集">采集</div>
+            <div class="timing-block gps-c" style="left:76%;width:4%" title="解析">解析</div>
+            <div class="timing-block gps-w" style="left:81%;width:19%" title="等信号量...">等信号量...</div>
+          </div>
+        </div>
+
+        <!-- MQTT_APP -->
+        <div class="timing-row">
+          <div class="timing-label" style="color:var(--accent)">📶 MQTT_APP<br><span style="font-size:9px;color:var(--text2)">Prio 3</span></div>
+          <div class="timing-track">
+            <div class="timing-block mqtt-c" style="left:0;width:25%" title="状态机: POWER_OFF→...→CONNECTED">4G状态机连接中...</div>
+            <div class="timing-block mqtt-c" style="left:26%;width:4%" title="轮询状态机">轮询</div>
+            <div class="timing-block mqtt-c" style="left:36%;width:8%" title="xQueueReceive→AT+MPUB→重试→Give信号量">发送+释放</div>
+            <div class="timing-block mqtt-c" style="left:45%;width:6%" title="轮询状态机">轮询</div>
+            <div class="timing-block mqtt-c" style="left:55%;width:6%" title="轮询">轮询</div>
+            <div class="timing-block mqtt-c" style="left:65%;width:6%" title="轮询">轮询</div>
+            <div class="timing-block mqtt-c" style="left:72%;width:8%" title="发送+释放">发送+释放</div>
+            <div class="timing-block mqtt-c" style="left:81%;width:6%" title="轮询...">轮询</div>
+          </div>
+        </div>
+
+        <!-- Log_Task -->
+        <div class="timing-row">
+          <div class="timing-label" style="color:var(--pink)">📝 Log_Task<br><span style="font-size:9px;color:var(--text2)">Prio 1</span></div>
+          <div class="timing-track">
+            <div class="timing-block log" style="left:2%;width:3%" title="日志输出">📤</div>
+            <div class="timing-block log" style="left:16%;width:2%">📤</div>
+            <div class="timing-block log" style="left:28%;width:2%">📤</div>
+            <div class="timing-block log" style="left:38%;width:2%">📤</div>
+            <div class="timing-block log" style="left:48%;width:2%">📤</div>
+            <div class="timing-block log" style="left:60%;width:2%">📤</div>
+            <div class="timing-block log" style="left:78%;width:2%">📤</div>
+          </div>
+        </div>
+
+        <!-- Semaphore -->
+        <div class="timing-row">
+          <div class="timing-label" style="color:var(--orange)">🔒 信号量<br><span style="font-size:9px;color:var(--text2)">gpsCaptureSync</span></div>
+          <div class="timing-track" style="background:transparent;position:relative">
+            <div style="position:absolute;left:25%;top:8px;font-size:10px;color:var(--green)">▲ Take</div>
+            <div style="position:absolute;left:43%;top:8px;font-size:10px;color:var(--accent)">▼ Give</div>
+            <div style="position:absolute;left:48%;top:8px;font-size:10px;color:var(--green)">▲ Take</div>
+            <div style="position:absolute;left:82%;top:8px;font-size:10px;color:var(--accent)">▼ Give</div>
+          </div>
+        </div>
+
+        <!-- USART3 state -->
+        <div class="timing-row">
+          <div class="timing-label" style="color:var(--text2)">🔌 USART3<br><span style="font-size:9px;color:var(--text2)">状态</span></div>
+          <div class="timing-track" style="background:transparent;position:relative">
+            <div style="position:absolute;left:0;width:35%;height:100%;background:rgba(239,68,68,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--red)">关闭 (无中断)</div>
+            <div style="position:absolute;left:36%;width:10%;height:100%;background:rgba(16,185,129,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--green)">开启</div>
+            <div style="position:absolute;left:47%;width:23%;height:100%;background:rgba(239,68,68,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--red)">关闭</div>
+            <div style="position:absolute;left:71%;width:9%;height:100%;background:rgba(16,185,129,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--green)">开启</div>
+            <div style="position:absolute;left:81%;width:19%;height:100%;background:rgba(239,68,68,0.15);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--red)">关闭</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="timing-legend">
+        <span style="color:var(--green)">■ 执行中</span>
+        <span style="color:var(--text2)">□ 阻塞等待</span>
+        <span style="color:var(--accent)">▲ Take信号量</span>
+        <span style="color:var(--accent)">▼ Give信号量</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 4. 异步日志系统 ===== -->
+  <div class="panel full" style="margin-bottom:18px">
+    <h3>4. 异步日志系统 — 不阻塞业务任务的调试输出</h3>
+    <div class="grid2">
+      <div>
+        <div class="highlight-box" style="margin-top:0">
+          <b>核心思路：</b>传统 <code>printf</code> 在115200波特率下发送一行日志可能阻塞数毫秒，对实时系统是致命的。
+          本系统将日志格式化与物理发送<b>完全解耦</b>。
+        </div>
+        <div class="code-block" style="height:260px">
+<span class="cmt">// bsp_usart.h:43-56  日志系统配置</span>
+<span class="pp">#define LOG_QUEUE_LENGTH    10</span>      <span class="cmt">// 队列深度10条</span>
+<span class="pp">#define LOG_MSG_MAX_LEN     128</span>     <span class="cmt">// 每条最大128字节</span>
+
+<span class="kw">extern bool</span> g_log_output_enabled;    <span class="cmt">// 运行时全局开关</span>
+
+<span class="cmt">// 核心宏：异步打印，仅格式化+入队，立即返回</span>
+<span class="pp">#define LOG_PRINT(fmt, ...)</span> Log_Printf(fmt, ##__VA_ARGS__)
+
+<span class="cmt">// bsp_usart.c:44-69  Log_Printf实现</span>
+<span class="kw">void</span> <span class="fn">Log_Printf</span>(<span class="kw">const char</span> *format, ...) {
+    <span class="kw">if</span> (!g_log_output_enabled) <span class="kw">return</span>;  <span class="cmt">// 全局开关</span>
+    <span class="kw">char</span> buffer[LOG_MSG_MAX_LEN];
+    <span class="kw">va_list</span> args;
+    va_start(args, format);
+    vsnprintf(buffer, LOG_MSG_MAX_LEN, format, args);
+    va_end(args);
+
+    <span class="kw">if</span> (xTaskGetSchedulerState() != taskSCHEDULER_NOT_STARTED) {
+        xQueueSendToBack(xLogQueue, buffer, <span class="num">0</span>);  <span class="cmt">// 非阻塞入队</span>
+    } <span class="kw">else</span> {
+        Usart_SendString(DEBUG_USARTx, buffer);  <span class="cmt">// 调度器未启动时直接发</span>
+    }
+}
+</div>
+      </div>
+      <div>
+        <div class="code-block" style="height:260px">
+<span class="cmt">// bsp_usart.c:26-33  Log_Task 实现</span>
+<span class="kw">static void</span> <span class="fn">Log_Task</span>(<span class="kw">void</span> *pvParameters) {
+    <span class="kw">char</span> msg[LOG_MSG_MAX_LEN];
+    <span class="kw">while</span> (<span class="num">1</span>) {
+        <span class="cmt">// 阻塞等待队列有数据</span>
+        <span class="kw">if</span> (xQueueReceive(xLogQueue, msg, portMAX_DELAY) == pdTRUE) {
+            Usart_SendString(DEBUG_USARTx, msg);  <span class="cmt">// 物理发送</span>
+        }
+    }
+}
+
+<span class="cmt">// bsp_usart.c:36-41  Log_Init 初始化</span>
+<span class="kw">void</span> <span class="fn">Log_Init</span>(<span class="kw">void</span>) {
+    xLogQueue = xQueueCreate(LOG_QUEUE_LENGTH, LOG_MSG_MAX_LEN);
+    <span class="kw">if</span> (xLogQueue != NULL) {
+        xTaskCreate(Log_Task, <span class="str">"Log_Task"</span>, <span class="num">128</span>, NULL, <span class="num">1</span>, &xLogTaskHandle);
+    }
+}
+</div>
+        <div class="highlight-box green">
+          <b>设计要点：</b><br>
+          ① LOG_PRINT仅做vsnprintf+入队，不等待发送完成<br>
+          ② 调度器未启动时直接阻塞发送，确保初始化日志不丢失<br>
+          ③ g_log_output_enabled运行时开关，部署后可关闭日志省CPU<br>
+          ④ USART1仅做TX，无RX中断，不占用额外中断资源
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 5. 定位数据处理 ===== -->
+  <div class="panel full" style="margin-bottom:18px">
+    <h3>5. 定位数据处理管线 — 从NMEA原始数据到云端JSON</h3>
+    <div class="grid2">
+      <div class="panel">
+        <h3>NMEA → 十进制度 坐标转换</h3>
+        <div class="code-block" style="height:200px">
+<span class="cmt">// mycode.c:295-311  format_degree_minute()</span>
+<span class="cmt">// NMEA格式: ddmm.mmmm (度-分混合)</span>
+<span class="cmt">// 转换公式: 十进制度 = dd + mm.mmmm/60</span>
+<span class="cmt">// 示例: 3110.4697 → 31 + 10.4697/60 = 31.174495</span>
+<span class="kw">static void</span> <span class="fn">format_degree_minute</span>(<span class="kw">const char</span>* raw, <span class="kw">char</span>* out, <span class="kw">int</span> is_lon) {
+    <span class="kw">if</span> (raw[<span class="num">0</span>] == <span class="str">'\0'</span>) {
+        strcpy(out, <span class="str">"0.000000"</span>);  <span class="cmt">// 空值保护</span>
+        <span class="kw">return</span>;
+    }
+    <span class="kw">double</span> raw_val = atof(raw);
+    <span class="kw">int</span> degrees = (<span class="kw">int</span>)(raw_val / <span class="num">100.0</span>);   <span class="cmt">// 提取度</span>
+    <span class="kw">double</span> minutes = raw_val - (degrees * <span class="num">100.0</span>); <span class="cmt">// 提取分</span>
+    <span class="kw">double</span> decimal_degrees = degrees + (minutes / <span class="num">60.0</span>);
+    sprintf(out, <span class="str">"%.6f"</span>, decimal_degrees);  <span class="cmt">// 6位小数</span>
+}
+</div>
+        <table style="font-size:11px;margin-top:8px;width:100%;color:var(--text2)">
+          <tr><td>纬度 3110.4697,N</td><td>→</td><td style="color:var(--green)">31.174495</td></tr>
+          <tr><td>经度 12123.3689,E</td><td>→</td><td style="color:var(--green)">121.389482</td></tr>
+        </table>
+      </div>
+      <div class="panel">
+        <h3>UTC→北京时间 与 JSON组装</h3>
+        <div class="code-block" style="height:200px">
+<span class="cmt">// mycode.c:258-283  format_time()</span>
+<span class="cmt">// NMEA UTC: hhmmss.sss → 北京时间: UTC+8</span>
+<span class="kw">static void</span> <span class="fn">format_time</span>(<span class="kw">const char</span>* raw, <span class="kw">char</span>* out) {
+    <span class="kw">if</span> (raw[<span class="num">0</span>] == <span class="str">'\0'</span>) {
+        strcpy(out, <span class="str">"2026-05-10 00:00:00"</span>); <span class="kw">return</span>;
+    }
+    <span class="kw">char</span> temp[<span class="num">7</span>] = <span class="str">"000000"</span>; <span class="kw">int</span> len = <span class="num">0</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i=<span class="num">0</span>; raw[i]!=<span class="str">'\0'</span> && len&lt;<span class="num">6</span>; i++)
+        <span class="kw">if</span> (raw[i]&gt;=<span class="str">'0'</span> && raw[i]&lt;=<span class="str">'9'</span>) temp[len++]=raw[i];
+    <span class="kw">int</span> hour = (atoi(temp)/<span class="num">10000</span> + <span class="num">8</span>) % <span class="num">24</span>;  <span class="cmt">// +8跨天取模</span>
+    sprintf(out, <span class="str">"2026-05-10 %02d:%c%c:%c%c"</span>, hour,
+            temp[<span class="num">2</span>],temp[<span class="num">3</span>],temp[<span class="num">4</span>],temp[<span class="num">5</span>]);
+}
+
+<span class="cmt">// mycode.c:407-412  JSON组装 (Air780e用\22转义双引号)</span>
+<span class="cmt">// 输出: {\22id\22:\229\22,\22longitude\22:121.389482,...}</span>
+</div>
+      </div>
+    </div>
+
+    <div class="highlight-box" style="margin-top:12px">
+      <b>JSON转义细节 (Air780e适配)：</b>AT+MPUB指令中双引号会与AT语法冲突。
+      查阅合宙Air780e文档后，使用 <code>\22</code> 作为双引号的转义序列。
+      模块内部会将 <code>\22</code> 还原为标准 <code>"</code> 后发送到MQTT Broker。
+    </div>
+  </div>
+
+  <!-- ===== 6. 产品化设计要点 ===== -->
+  <div class="panel full">
+    <h3>6. 产品化设计要点 — 区别于实验室原型的关键决策</h3>
+    <div class="grid3">
+      <div class="panel" style="border-top:3px solid var(--red)">
+        <h3 style="color:var(--red)">🛡 三重错误恢复</h3>
+        <div style="font-size:12px;line-height:1.8;color:var(--text2)">
+          ① 指数退避：2s→4s→8s→...→60s<br>
+          ② 硬件复位：连续5次失败触发RST<br>
+          ③ ERROR兜底：10秒超时强制复位<br>
+          <b>确保无人值守环境自主恢复</b>
+        </div>
+      </div>
+      <div class="panel" style="border-top:3px solid var(--orange)">
+        <h3 style="color:var(--orange)">📦 离线数据不丢失</h3>
+        <div style="font-size:12px;line-height:1.8;color:var(--text2)">
+          ① 3条环形消息缓存(head/tail)<br>
+          ② 断网自动缓存→重连自动Flush<br>
+          ③ 缓存满时丢弃最旧消息<br>
+          <b>保证断网期间关键数据可追溯</b>
+        </div>
+      </div>
+      <div class="panel" style="border-top:3px solid var(--green)">
+        <h3 style="color:var(--green)">🔧 自诊断能力</h3>
+        <div style="font-size:12px;line-height:1.8;color:var(--text2)">
+          ① USART3硬件回环自检(main.c:37)<br>
+          ② AT指令超时与错误码全量日志<br>
+          ③ LED心跳：1秒翻转指示系统存活<br>
+          ④ 4G信号质量(CSQ)持续监测<br>
+          <b>部署前验证+运行时监控</b>
+        </div>
+      </div>
+      <div class="panel" style="border-top:3px solid var(--accent)">
+        <h3 style="color:var(--accent)">⚡ 资源精细化管理</h3>
+        <div style="font-size:12px;line-height:1.8;color:var(--text2)">
+          ① 堆大小精确计算：16KB/20KB<br>
+          ② 队列深度按需分配(512/10/10)<br>
+          ③ 任务栈独立配置(128~512B)<br>
+          ④ USART3按需开关省中断开销<br>
+          <b>20KB RAM实现完整功能</b>
+        </div>
+      </div>
+      <div class="panel" style="border-top:3px solid var(--accent2)">
+        <h3 style="color:var(--accent2)">📡 4G通信鲁棒性</h3>
+        <div style="font-size:12px;line-height:1.8;color:var(--text2)">
+          ① 非阻塞状态机(每10ms轮询)<br>
+          ② AT指令超时独立配置(1s~5s)<br>
+          ③ URC异步消息实时捕获<br>
+          ④ MIPSTART双应答("CONNECT OK"/"ALREADY CONNECT")<br>
+          <b>适应野外弱网环境</b>
+        </div>
+      </div>
+      <div class="panel" style="border-top:3px solid var(--pink)">
+        <h3 style="color:var(--pink)">🔬 调试友好性</h3>
+        <div style="font-size:12px;line-height:1.8;color:var(--text2)">
+          ① 异步日志不阻塞业务<br>
+          ② LOG_ENABLE_4G_DEBUG编译开关<br>
+          ③ g_log_output_enabled运行时开关<br>
+          ④ USART1独立调试通道<br>
+          <b>开发→部署平滑过渡</b>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tooltip" class="tooltip"></div>
+</section>
+
+<!-- ==================== 系统概览 ==================== -->
+<section class="section" id="tab-overview">
   <div class="section-title">系统总览 — 硬件架构与代码映射</div>
   <div class="section-desc">左右拖动/缩放查看完整架构。悬停模块查看详情。点击模块跳转到对应代码。</div>
 
@@ -250,12 +847,12 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
     <div class="panel stat-card purple"><div class="value" style="font-size:28px">Air780e</div><div class="label">4G Cat.1 MQTT通信</div></div>
   </div>
 
-  <div class="panel full" style="position:relative; min-height:460px;">
+  <div class="panel full" style="position:relative;min-height:460px;">
     <h3>系统架构图</h3>
     <div class="arch-container" id="archContainer">
       <canvas id="connCanvas"></canvas>
 
-      <div class="arch-box gps" data-tip="TAU1201 北斗/GPS模块<br>USART3: PB10(TX) / PB11(RX)<br>波特率: 115200<br>协议: UBX+NMEA GGA" data-code="mycode.c:51-90">
+      <div class="arch-box gps" data-tip="TAU1201 北斗/GPS模块<br>USART3: PB10(TX) / PB11(RX)<br>波特率: 115200<br>协议: UBX+NMEA GGA" data-code="mycode.c:82-192">
         <span class="chip">🛰 TAU1201</span>
         <div class="detail">北斗/GPS 定位模块<br>USART3 · 115200bps<br>仅输出 GGA 语句</div>
       </div>
@@ -270,7 +867,7 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
         <div class="detail">4G Cat.1 通信模块<br>USART2 · AT指令集<br>MQTT Client</div>
       </div>
 
-      <div class="arch-box cloud" data-tip="MQTT Broker<br>8.136.109.126:1883<br>mosquitto / hfut<br>Topic: /BEIDOU001/datas" data-code="mycode.c:349">
+      <div class="arch-box cloud" data-tip="MQTT Broker<br>8.136.109.126:1883<br>mosquitto / hfut<br>Topic: /BEIDOU001/datas" data-code="mycode.c:471">
         <span class="chip">☁️ MQTT Broker</span>
         <div class="detail">8.136.109.126:1883<br>mosquitto 服务器<br>/BEIDOU001/datas</div>
       </div>
@@ -279,23 +876,11 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
         <span class="chip">🔌 调试串口</span>
         <div class="detail">USART1 · PA9/PA10<br>LOG_PRINT 异步日志</div>
       </div>
-
-      <div class="arch-box led" data-tip="LED1: 1秒定时器翻转 (心跳)<br>LED2: 状态指示<br>LED3: MQTT数据接收闪烁" data-code="bsp_led.c:25-64">
-        <span class="chip">💡 LED×3</span>
-        <div class="detail">状态指示</div>
-      </div>
-
-      <div class="arch-box key" data-tip="KEY1/KEY2: 用户交互按键<br>内部上拉, 低电平触发" data-code="bsp_key.c:25-67">
-        <span class="chip">🔘 KEY×2</span>
-        <div class="detail">用户输入</div>
-      </div>
     </div>
   </div>
-
-  <div id="tooltip" class="tooltip"></div>
 </section>
 
-<!-- ===================== 硬件原理图 ===================== -->
+<!-- ==================== 硬件原理图 ==================== -->
 <section class="section" id="tab-hardware">
   <div class="section-title">硬件原理图 — 引脚连接与信号映射</div>
   <div class="section-desc">展示 STM32F103C8T6 与各外设模块的详细引脚连接、电气特性和中断优先级分配。</div>
@@ -332,9 +917,9 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
       </table>
       <div style="margin-top:12px;font-size:12px;color:var(--text2);line-height:1.6">
         <b>设计原则：</b><br>
-        • USART3(GPS) 优先级 5 > USART2(4G) 优先级 6，确保 115200bps GPS 数据不丢包<br>
-        • 所有中断优先级 > configMAX_SYSCALL_INTERRUPT_PRIORITY(11)，允许在ISR中使用FreeRTOS API<br>
-        • 中断分组：4位抢占优先级，0位子优先级
+        · USART3(GPS) 优先级 5 > USART2(4G) 优先级 6，确保 115200bps GPS 数据不丢包<br>
+        · 所有中断优先级 > configMAX_SYSCALL_INTERRUPT_PRIORITY(11)，允许在ISR中使用FreeRTOS API<br>
+        · 中断分组：4位抢占优先级，0位子优先级
       </div>
     </div>
   </div>
@@ -347,72 +932,49 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
         <marker id="arrowHwA" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="#00d4ff"/></marker>
         <linearGradient id="mcuGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#7c3aed" stop-opacity="0.2"/><stop offset="100%" stop-color="#00d4ff" stop-opacity="0.1"/></linearGradient>
       </defs>
-
-      <!-- MCU -->
       <rect x="340" y="110" width="300" height="180" rx="10" fill="url(#mcuGrad)" stroke="#7c3aed" stroke-width="2"/>
       <text x="490" y="140" text-anchor="middle" fill="#e2e8f0" font-size="16" font-weight="700">STM32F103C8T6</text>
       <text x="490" y="162" text-anchor="middle" fill="#94a3b8" font-size="11">ARM Cortex-M3 @ 72MHz</text>
-
-      <!-- Internal blocks -->
       <rect x="360" y="175" width="80" height="24" rx="4" fill="rgba(0,212,255,0.1)" stroke="#00d4ff" stroke-width="0.5"/>
       <text x="400" y="191" text-anchor="middle" fill="#00d4ff" font-size="10">USART1 调试</text>
       <rect x="450" y="175" width="80" height="24" rx="4" fill="rgba(0,212,255,0.1)" stroke="#00d4ff" stroke-width="0.5"/>
       <text x="490" y="191" text-anchor="middle" fill="#00d4ff" font-size="10">USART2 4G</text>
       <rect x="540" y="175" width="80" height="24" rx="4" fill="rgba(16,185,129,0.1)" stroke="#10b981" stroke-width="0.5"/>
       <text x="580" y="191" text-anchor="middle" fill="#10b981" font-size="10">USART3 GPS</text>
-
       <rect x="380" y="210" width="60" height="22" rx="4" fill="rgba(245,158,11,0.1)" stroke="#f59e0b" stroke-width="0.5"/>
       <text x="410" y="225" text-anchor="middle" fill="#f59e0b" font-size="10">GPIO</text>
       <rect x="455" y="210" width="60" height="22" rx="4" fill="rgba(236,72,153,0.1)" stroke="#ec4899" stroke-width="0.5"/>
       <text x="485" y="225" text-anchor="middle" fill="#ec4899" font-size="10">GPIO</text>
-
       <text x="490" y="270" text-anchor="middle" fill="#94a3b8" font-size="10">FreeRTOS V9.0 · 5 Tasks · 3 Queues · 16KB Heap</text>
-
-      <!-- GPS Module -->
       <rect x="50" y="130" width="180" height="90" rx="8" fill="rgba(16,185,129,0.08)" stroke="#10b981" stroke-width="1.5"/>
       <text x="140" y="158" text-anchor="middle" fill="#10b981" font-size="15" font-weight="700">🛰 TAU1201</text>
       <text x="140" y="178" text-anchor="middle" fill="#94a3b8" font-size="10">北斗/GPS 双模定位</text>
       <text x="140" y="195" text-anchor="middle" fill="#94a3b8" font-size="10">仅输出 $GNGGA 语句</text>
-
-      <!-- 4G Module -->
       <rect x="750" y="130" width="180" height="90" rx="8" fill="rgba(0,212,255,0.08)" stroke="#00d4ff" stroke-width="1.5"/>
       <text x="840" y="158" text-anchor="middle" fill="#00d4ff" font-size="15" font-weight="700">📶 Air780e</text>
       <text x="840" y="178" text-anchor="middle" fill="#94a3b8" font-size="10">4G Cat.1 通信模块</text>
       <text x="840" y="195" text-anchor="middle" fill="#94a3b8" font-size="10">AT指令 · MQTT Client</text>
-
-      <!-- USB/Debug -->
       <rect x="50" y="290" width="180" height="55" rx="8" fill="rgba(236,72,153,0.06)" stroke="#ec4899" stroke-width="1"/>
       <text x="140" y="315" text-anchor="middle" fill="#ec4899" font-size="13" font-weight="700">🔌 USB转串口</text>
       <text x="140" y="333" text-anchor="middle" fill="#94a3b8" font-size="10">CH340 · 115200bps</text>
-
-      <!-- MQTT Broker -->
       <rect x="750" y="290" width="180" height="55" rx="8" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="1"/>
       <text x="840" y="315" text-anchor="middle" fill="#f59e0b" font-size="13" font-weight="700">☁️ MQTT Broker</text>
       <text x="840" y="333" text-anchor="middle" fill="#94a3b8" font-size="10">8.136.109.126:1883</text>
-
-      <!-- Connections -->
       <line x1="230" y1="175" x2="360" y2="175" stroke="#10b981" stroke-width="1.5" marker-end="url(#arrowHwA)" stroke-dasharray="6,3"/>
       <text x="295" y="168" fill="#10b981" font-size="9">USART3 · 115200</text>
-
       <line x1="640" y1="175" x2="750" y2="175" stroke="#00d4ff" stroke-width="1.5" marker-end="url(#arrowHwA)" stroke-dasharray="6,3"/>
       <text x="695" y="168" fill="#00d4ff" font-size="9">USART2 · 115200</text>
-
       <line x1="230" y1="320" x2="360" y2="198" stroke="#ec4899" stroke-width="1.2" marker-end="url(#arrowHw)" stroke-dasharray="4,3"/>
       <text x="280" y="270" fill="#ec4899" font-size="9">USART1</text>
-
-      <!-- Control lines from MCU to 4G -->
       <line x1="490" y1="217" x2="750" y2="210" stroke="#f59e0b" stroke-width="1.2" marker-end="url(#arrowHw)" stroke-dasharray="3,3"/>
       <text x="620" y="205" fill="#f59e0b" font-size="8">PB0→PWR PB1→RST</text>
-
-      <!-- 4G to Cloud -->
       <line x1="840" y1="220" x2="840" y2="290" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrowHwA)" stroke-dasharray="8,4"/>
       <text x="855" y="258" fill="#f59e0b" font-size="9">4G LTE</text>
-
     </svg>
   </div>
 </section>
 
-<!-- ===================== 任务调度 ===================== -->
+<!-- ==================== 任务调度 ==================== -->
 <section class="section" id="tab-tasks">
   <div class="section-title">FreeRTOS 任务调度可视化</div>
   <div class="section-desc">展示5个任务的优先级关系、栈空间分配、CPU时间片和任务间同步机制。</div>
@@ -425,31 +987,31 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
           <div class="tname">🛰 GPS_TASK</div>
           <div class="tprio">优先级 4</div>
           <div class="tstack">栈: 256B</div>
-          <div class="task-bar"><div class="task-bar-fill" style="width:35%;background:var(--red);animation-delay:0s"></div></div>
+          <div class="task-bar"><div class="task-bar-fill" style="width:35%;background:var(--red)"></div></div>
         </div>
         <div class="task-row prio4">
           <div class="tname">⏱ Timer1 Service</div>
           <div class="tprio">优先级 4</div>
           <div class="tstack">栈: 256B</div>
-          <div class="task-bar"><div class="task-bar-fill" style="width:8%;background:var(--red);animation-delay:0.3s"></div></div>
+          <div class="task-bar"><div class="task-bar-fill" style="width:8%;background:var(--red)"></div></div>
         </div>
         <div class="task-row prio3" onclick="showTaskDetail('mqtt')">
           <div class="tname">📶 MQTT_APP</div>
           <div class="tprio">优先级 3</div>
           <div class="tstack">栈: 384B</div>
-          <div class="task-bar"><div class="task-bar-fill" style="width:45%;background:var(--orange);animation-delay:0.6s"></div></div>
+          <div class="task-bar"><div class="task-bar-fill" style="width:45%;background:var(--orange)"></div></div>
         </div>
         <div class="task-row prio3">
           <div class="tname">📤 SEND_TASK</div>
           <div class="tprio">优先级 3</div>
           <div class="tstack">栈: 512B</div>
-          <div class="task-bar"><div class="task-bar-fill" style="width:5%;background:var(--orange);animation-delay:0.9s"></div></div>
+          <div class="task-bar"><div class="task-bar-fill" style="width:5%;background:var(--orange)"></div></div>
         </div>
         <div class="task-row prio1">
           <div class="tname">📝 Log_Task</div>
           <div class="tprio">优先级 1</div>
           <div class="tstack">栈: 128B</div>
-          <div class="task-bar"><div class="task-bar-fill" style="width:12%;background:var(--green);animation-delay:1.2s"></div></div>
+          <div class="task-bar"><div class="task-bar-fill" style="width:12%;background:var(--green)"></div></div>
         </div>
       </div>
     </div>
@@ -473,64 +1035,37 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
   </div>
 </section>
 
-<!-- ===================== 数据流 ===================== -->
+<!-- ==================== 数据流 ==================== -->
 <section class="section" id="tab-dataflow">
   <div class="section-title">数据流管线 — GPS采集到云端发布全链路</div>
   <div class="section-desc">展示从 GPS 卫星信号接收 → NMEA 解析 → 格式化重构 → MQTT 发布 → 云端的完整数据流。</div>
 
   <div class="panel full" style="overflow-x:auto;">
-    <div style="display:flex;align-items:center;gap:16px;padding:16px;min-width:1100px;">
-      <div class="flow-node source">
-        <div>🛰 GPS卫星</div>
-        <div style="font-size:10px;color:var(--text2)">L1频段</div>
-      </div>
+    <div class="dataflow" style="flex-wrap:nowrap;min-width:1100px">
+      <div class="flow-node source"><div>🛰 GPS卫星</div><div style="font-size:10px;color:var(--text2)">L1频段</div></div>
       <div class="flow-arrow" style="background:var(--green)"></div>
-      <div class="flow-node source">
-        <div>📡 TAU1201</div>
-        <div style="font-size:10px;color:var(--text2)">输出 $GNGGA</div>
-      </div>
+      <div class="flow-node source"><div>📡 TAU1201</div><div style="font-size:10px;color:var(--text2)">输出 $GNGGA</div></div>
       <div class="flow-arrow" style="background:var(--green)"></div>
-      <div class="flow-node source">
-        <div>🔌 USART3 RX</div>
-        <div style="font-size:10px;color:var(--text2)">中断接收</div>
-      </div>
+      <div class="flow-node source"><div>🔌 USART3 RX</div><div style="font-size:10px;color:var(--text2)">RXNE中断</div></div>
       <div class="flow-arrow" style="background:var(--green)"></div>
-      <div class="flow-node queue">
-        <div>📦 gpsQueue</div>
-        <div style="font-size:10px;color:var(--text2)">512字节 · FIFO</div>
-      </div>
+      <div class="flow-node queue"><div>📦 gpsQueue</div><div style="font-size:10px;color:var(--text2)">512B FIFO</div></div>
       <div class="flow-arrow" style="background:var(--orange)"></div>
-      <div class="flow-node process">
-        <div>⚙ GPS_TASK</div>
-        <div style="font-size:10px;color:var(--text2)">GGA提取+校验</div>
-      </div>
+      <div class="flow-node process"><div>⚙ GPS_TASK</div><div style="font-size:10px;color:var(--text2)">GGA解析+坐标转换</div></div>
       <div class="flow-arrow" style="background:var(--accent2)"></div>
-      <div class="flow-node queue">
-        <div>📦 mqttPublishQueue</div>
-        <div style="font-size:10px;color:var(--text2)">10条×256B</div>
-      </div>
+      <div class="flow-node queue"><div>📦 mqttPublishQueue</div><div style="font-size:10px;color:var(--text2)">10×256B</div></div>
       <div class="flow-arrow" style="background:var(--accent)"></div>
-      <div class="flow-node send">
-        <div>📶 MQTT_APP</div>
-        <div style="font-size:10px;color:var(--text2)">AT+MPUB</div>
-      </div>
+      <div class="flow-node send"><div>📶 MQTT_APP</div><div style="font-size:10px;color:var(--text2)">AT+MPUB发送</div></div>
       <div class="flow-arrow" style="background:var(--accent)"></div>
-      <div class="flow-node send">
-        <div>📡 Air780e</div>
-        <div style="font-size:10px;color:var(--text2)">4G LTE</div>
-      </div>
-      <div class="flow-arrow" style="background:#f59e0b"></div>
-      <div class="flow-node cloud">
-        <div>☁️ MQTT Broker</div>
-        <div style="font-size:10px;color:var(--text2)">8.136.109.126</div>
-      </div>
+      <div class="flow-node send"><div>📡 Air780e</div><div style="font-size:10px;color:var(--text2)">4G LTE</div></div>
+      <div class="flow-arrow" style="background:var(--orange)"></div>
+      <div class="flow-node cloud"><div>☁️ MQTT Broker</div><div style="font-size:10px;color:var(--text2)">8.136.109.126:1883</div></div>
     </div>
   </div>
 
   <div class="grid2" style="margin-top:18px;">
     <div class="panel">
       <h3>GPS 原始数据示例（NMEA GGA）</h3>
-      <div class="code-block" style="height:120px">
+      <div class="code-block" style="height:90px">
 <span style="color:#7ee787;">$GNGGA</span>,<span style="color:#79c0ff">061234.000</span>,<span style="color:#a5d6ff">3110.4697</span>,<span style="color:#d2a8ff">N</span>,<span style="color:#a5d6ff">12123.3689</span>,<span style="color:#d2a8ff">E</span>,<span style="color:#79c0ff">1</span>,<span style="color:#79c0ff">08</span>,<span style="color:#79c0ff">1.0</span>,<span style="color:#a5d6ff">50.5</span>,<span style="color:#d2a8ff">M</span>,,<span style="color:#d2a8ff">M</span>,,*<span style="color:#79c0ff">4B</span>
 </div>
       <table style="font-size:11px;margin-top:8px;width:100%">
@@ -540,42 +1075,25 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
     </div>
 
     <div class="panel">
-      <h3>格式化后数据（上传格式）</h3>
-      <div class="code-block" style="height:120px">
-<span style="color:#d2a8ff;">BEIDOU_CLIENT_001</span>,<span style="color:#a5d6ff">12123.3689</span>,<span style="color:#a5d6ff">3110.4697</span>,<span style="color:#79c0ff">50.5</span>,<span style="color:#79c0ff">1</span>,<span style="color:#a5d6ff">3.3</span>
+      <h3>格式化后 JSON 数据（上传格式）</h3>
+      <div class="code-block" style="height:90px">
+<span style="color:#d2a8ff;">{</span><span style="color:#a5d6ff;">"id"</span>:<span style="color:#79c0ff;">"9"</span>,<span style="color:#a5d6ff;">"deviceId"</span>:<span style="color:#79c0ff;">"ice"</span>,<span style="color:#a5d6ff;">"longitude"</span>:<span style="color:#a5d6ff;">121.389482</span>,<span style="color:#a5d6ff;">"latitude"</span>:<span style="color:#a5d6ff;">31.174495</span>,<span style="color:#a5d6ff;">"altitude"</span>:<span style="color:#79c0ff;">50.50</span>,<span style="color:#a5d6ff;">"pointType"</span>:<span style="color:#79c0ff;">"ICE_POINT"</span><span style="color:#d2a8ff;">}</span>
 </div>
       <table style="font-size:11px;margin-top:8px;width:100%">
-        <tr style="color:var(--text2)"><td>设备ID</td><td>经度</td><td>纬度</td><td>海拔(m)</td><td>定位模式</td><td>电压(V)</td></tr>
-        <tr style="color:var(--accent)"><td>BEIDOU_CLIENT_001</td><td>12123.3689</td><td>3110.4697</td><td>50.5</td><td>1</td><td>3.3</td></tr>
+        <tr style="color:var(--text2)"><td>id:9</td><td>deviceId:ice</td><td>longitude</td><td>latitude</td><td>altitude</td><td>pointType</td></tr>
+        <tr style="color:var(--accent)"><td>消息ID</td><td>设备标识</td><td>经度(°)</td><td>纬度(°)</td><td>海拔(m)</td><td>覆冰点类型</td></tr>
       </table>
-    </div>
-  </div>
-
-  <div class="panel full" style="margin-top:18px;">
-    <h3>GPS 数据校验流程图</h3>
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px;justify-content:center;padding:8px 0;">
-      <div style="padding:8px 14px;background:var(--panel);border:1px solid var(--border);border-radius:6px;">原始GGA字符串</div>
-      <span style="color:var(--accent);font-size:18px;">→</span>
-      <div style="padding:8px 14px;background:rgba(0,212,255,0.06);border:1px solid var(--accent);border-radius:6px;">手动逗号分割<br><span style="color:var(--text2);font-size:10px;">保留空字段</span></div>
-      <span style="color:var(--accent);font-size:18px;">→</span>
-      <div style="padding:8px 14px;background:rgba(124,58,237,0.06);border:1px solid var(--accent2);border-radius:6px;">提取 fields[2,4,6,9]<br><span style="color:var(--text2);font-size:10px;">纬度/经度/模式/海拔</span></div>
-      <span style="color:var(--accent);font-size:18px;">→</span>
-      <div style="padding:8px 14px;background:rgba(245,158,11,0.06);border:1px solid var(--orange);border-radius:6px;">范围校验<br><span style="color:var(--text2);font-size:10px;">lat∈[0,9000] lon∈[0,18000]</span></div>
-      <span style="color:var(--green);font-size:18px;">→</span>
-      <div style="padding:8px 14px;background:rgba(16,185,129,0.06);border:1px solid var(--green);border-radius:6px;">✅ 拼接输出</div>
-      <span style="color:var(--red);font-size:18px;">→ (失败)</span>
-      <div style="padding:8px 14px;background:rgba(239,68,68,0.06);border:1px solid var(--red);border-radius:6px;">❌ 丢弃</div>
     </div>
   </div>
 </section>
 
-<!-- ===================== 状态机 ===================== -->
+<!-- ==================== 状态机 ==================== -->
 <section class="section" id="tab-statemachine">
   <div class="section-title">Air780e 4G模块 — 非阻塞状态机</div>
-  <div class="section-desc">13个状态的完整流转。悬停查看状态详情。点击「模拟重连」查看退避机制。</div>
+  <div class="section-desc">13个状态的完整流转。悬停查看状态详情。</div>
 
   <div class="panel full">
-    <h3>MQTT 连接状态机 (12个有效状态)</h3>
+    <h3>MQTT 连接状态机 (13个状态)</h3>
     <div class="state-machine" style="padding:16px 0">
       <div class="sm-state" data-state="power_off">POWER_OFF<br><span style="color:var(--text2);font-size:9px">关机</span></div>
       <span class="sm-arrow">→</span>
@@ -655,50 +1173,52 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
   </div>
 </section>
 
-<!-- ===================== 关键算法 ===================== -->
+<!-- ==================== 关键算法 ==================== -->
 <section class="section" id="tab-algorithms">
   <div class="section-title">关键算法深度解析</div>
 
   <div class="grid2">
     <div class="panel">
-      <h3>1. NMEA GGA 手动分割算法</h3>
-      <div class="code-block" style="height:220px;">
-<span class="cmt">// mycode.c:170-198  NMEA逗号分割 (保留空字段)</span>
-<span class="kw">static bool</span> <span class="fn">format_gps_data</span>(<span class="kw">const char</span>* raw_gga, ...) {
-    <span class="kw">char</span> temp[<span class="num">128</span>], *fields[<span class="num">20</span>];
-    <span class="kw">int</span> count = <span class="num">0</span>;
-
-    <span class="kw">char</span>* p = temp;
-    fields[count++] = p;          <span class="cmt">// 第一个字段指针</span>
-    <span class="kw">while</span> (*p && count < <span class="num">20</span>) {
-        <span class="kw">if</span> (*p == <span class="str">','</span>) {         <span class="cmt">// 遇到逗号</span>
-            *p = <span class="str">'\0'</span>;            <span class="cmt">// 就地置零 → 切割</span>
-            fields[count++] = p + <span class="num">1</span>;  <span class="cmt">// 下一字段指针</span>
+      <h3>1. NMEA CSV字段提取</h3>
+      <div class="code-block" style="height:180px;">
+<span class="cmt">// mycode.c:234-249  get_csv_field()</span>
+<span class="kw">static void</span> <span class="fn">get_csv_field</span>(<span class="kw">const char</span>* csv, <span class="kw">int</span> field_idx,
+                           <span class="kw">char</span>* out_buf, <span class="kw">int</span> max_len) {
+    <span class="kw">int</span> cur_idx = <span class="num">0</span>, out_idx = <span class="num">0</span>;
+    out_buf[<span class="num">0</span>] = <span class="str">'\0'</span>;
+    <span class="kw">for</span> (<span class="kw">int</span> i = <span class="num">0</span>; csv[i] != <span class="str">'\0'</span>; i++) {
+        <span class="kw">if</span> (csv[i] == <span class="str">','</span>) {
+            cur_idx++;
+            <span class="kw">if</span> (cur_idx > field_idx) <span class="kw">break</span>;
+        } <span class="kw">else if</span> (cur_idx == field_idx) {
+            <span class="kw">if</span> (out_idx < max_len - <span class="num">1</span>) {
+                out_buf[out_idx++] = csv[i];
+                out_buf[out_idx] = <span class="str">'\0'</span>;
+            }
         }
-        p++;
     }
-    <span class="cmt">// fields[0]=$GNGGA  fields[2]=纬度  fields[4]=经度</span>
-    <span class="cmt">// fields[6]=模式    fields[9]=海拔</span>
-    ...
 }
+<span class="cmt">// 提取GGA字段: [1]=时间 [2]=纬度 [4]=经度 [9]=海拔</span>
 </div>
     </div>
     <div class="panel">
-      <h3>2. 信号量流水线同步算法</h3>
-      <div style="font-size:12px;line-height:1.8;margin-top:8px;">
-        <div style="background:rgba(16,185,129,0.06);border-left:2px solid var(--green);padding:8px 12px;margin-bottom:6px;">
-          <b style="color:var(--green)">GPS_TASK:</b> xSemaphoreTake(gpsCaptureSync, ∞)
-          <br>→ GPS_Enable() → 采集GGA → GPS_Disable() → 数据入队
-        </div>
-        <div style="background:rgba(0,212,255,0.06);border-left:2px solid var(--accent);padding:8px 12px;margin-bottom:6px;">
-          <b style="color:var(--accent)">MQTT_APP:</b> xQueueReceive(mqttPublishQueue)
-          <br>→ AT+MPUB → 重试3次 → xSemaphoreGive(gpsCaptureSync) ← 解锁下一轮采集
-        </div>
-        <div style="color:var(--text2);font-size:11px;margin-top:8px;">
-          <b>设计优势：</b>实现"一收一发"节奏控制，避免GPS串口长时间开放造成中断风暴。<br>
-          <b>死锁预防：</b>初始时由 GPS_TASK 在4G连上后主动释放一次信号量启动流水线。
-        </div>
-      </div>
+      <h3>2. 坐标度分→十进制度转换</h3>
+      <div class="code-block" style="height:180px;">
+<span class="cmt">// mycode.c:295-311  format_degree_minute()</span>
+<span class="cmt">// NMEA: ddmm.mmmm → Decimal: dd + mm.mmmm/60</span>
+<span class="kw">static void</span> <span class="fn">format_degree_minute</span>(<span class="kw">const char</span>* raw,
+                                   <span class="kw">char</span>* out, <span class="kw">int</span> is_lon) {
+    <span class="kw">if</span> (raw[<span class="num">0</span>] == <span class="str">'\0'</span>) {
+        strcpy(out, <span class="str">"0.000000"</span>); <span class="kw">return</span>;
+    }
+    <span class="kw">double</span> raw_val = atof(raw);
+    <span class="kw">int</span> degrees = (<span class="kw">int</span>)(raw_val / <span class="num">100.0</span>);
+    <span class="kw">double</span> minutes = raw_val - (degrees * <span class="num">100.0</span>);
+    <span class="kw">double</span> decimal_degrees = degrees + (minutes / <span class="num">60.0</span>);
+    sprintf(out, <span class="str">"%.6f"</span>, decimal_degrees);
+}
+<span class="cmt">// 示例: 3110.4697 → 31 + 10.4697/60 = 31.174495</span>
+</div>
     </div>
   </div>
 
@@ -706,38 +1226,90 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
     <div class="panel">
       <h3>3. TAU1201 配置协议 — UBX二进制指令</h3>
       <div class="code-block" style="height:200px;">
-<span class="cmt">// UBX协议帧格式: 前导码|类|ID|长度|载荷|校验A|校验B</span>
-<span class="cmt">// 以关闭RMC语句为例:</span>
+<span class="cmt">// mycode.c:67-76  UBX协议帧格式</span>
+<span class="cmt">// 前导码(2B)|Class(1B)|ID(1B)|长度(2B)|载荷(NB)|校验A(1B)|校验B(1B)</span>
 <span class="kw">const uint8_t</span> close_rmc[] = {
     <span class="num">0xF1</span>, <span class="num">0xD9</span>,           <span class="cmt">// Preamble (同步头)</span>
     <span class="num">0x06</span>, <span class="num">0x01</span>,           <span class="cmt">// Class=06, ID=01 (CFG-MSG)</span>
-    <span class="num">0x03</span>, <span class="num">0x00</span>,           <span class="cmt">// Payload Length = 3 (小端序)</span>
-    <span class="num">0xF0</span>, <span class="num">0x05</span>, <span class="num">0x00</span>,     <span class="cmt">// Payload: 0xF0=关闭, 0x05=消息类型RMC</span>
+    <span class="num">0x03</span>, <span class="num">0x00</span>,           <span class="cmt">// Payload Length = 3 (Little-Endian)</span>
+    <span class="num">0xF0</span>, <span class="num">0x05</span>, <span class="num">0x00</span>,     <span class="cmt">// Payload: 0xF0=关闭, 0x05=RMC消息类型</span>
     <span class="num">0xFF</span>, <span class="num">0x19</span>            <span class="cmt">// CK_A, CK_B (校验和)</span>
 };
-<span class="cmt">// 共10条指令，分别关闭: GLL GSA GRS GSV RMC VTG ZDA GST TXT TXT_ANT</span>
-<span class="cmt">// 最终仅保留 GGA 语句输出</span>
+<span class="cmt">// TAU1201_Config() 连续发送10条，间隔50ms</span>
+<span class="cmt">// 关闭: GLL GSA GRS GSV RMC VTG ZDA GST TXT TXT_ANT</span>
 </div>
     </div>
     <div class="panel">
       <h3>4. USART3 中断安全处理</h3>
       <div class="code-block" style="height:200px;">
-<span class="cmt">// mycode.c:139-163  ORE防无限中断</span>
+<span class="cmt">// mycode.c:199-224  ORE防无限中断</span>
 <span class="kw">void</span> <span class="fn">USART3_IRQHandler</span>(<span class="kw">void</span>) {
     <span class="kw">volatile uint16_t</span> sr = GPS_USART->SR;
 
-    <span class="kw">if</span>(USART_GetITStatus(GPS_USART, USART_IT_RXNE) != RESET ||
-       (sr & (USART_FLAG_ORE | USART_FLAG_NE |
-              USART_FLAG_FE | USART_FLAG_PE)) != <span class="num">0</span>) {
+    <span class="kw">if</span>(USART_GetITStatus(GPS_USART,USART_IT_RXNE)!=RESET||
+       (sr&(USART_FLAG_ORE|USART_FLAG_NE|
+            USART_FLAG_FE|USART_FLAG_PE))!=<span class="num">0</span>){
 
-        <span class="kw">uint8_t</span> ch = USART_ReceiveData(GPS_USART); <span class="cmt">// 读DR清标志</span>
+        <span class="kw">uint8_t</span> ch = USART_ReceiveData(GPS_USART);
+        <span class="cmt">// ↑ 读DR一次清除RXNE/ORE/NE/FE/PE所有标志</span>
 
-        <span class="cmt">// 仅无错误时才入队，否则丢弃</span>
-        <span class="kw">if</span> ((sr & (USART_FLAG_ORE | USART_FLAG_NE |
-                  USART_FLAG_FE | USART_FLAG_PE)) == <span class="num">0</span>) {
-            xQueueSendFromISR(gpsQueue, &ch, &...);
+        <span class="kw">if</span>((sr&(USART_FLAG_ORE|USART_FLAG_NE|
+              USART_FLAG_FE|USART_FLAG_PE))==<span class="num">0</span>){
+            xQueueSendFromISR(gpsQueue,&ch,&xHPTW);
+        }<span class="kw">else</span>{
+            <span class="cmt">// 错误字节丢弃，标志已安全清除</span>
+            <span class="cmt">// 避免MCU陷入无限中断循环</span>
         }
-        portYIELD_FROM_ISR(...);
+        portYIELD_FROM_ISR(xHPTW);
+    }
+}
+</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-top:18px;">
+    <div class="panel">
+      <h3>5. Air780e USART2 IDLE中断接收</h3>
+      <div class="code-block" style="height:200px;">
+<span class="cmt">// Air780e.c:581-612  USART2_IRQHandler</span>
+<span class="kw">void</span> <span class="fn">USART2_IRQHandler</span>(<span class="kw">void</span>) {
+    <span class="kw">volatile uint16_t</span> sr = AIR780E_UART->SR;
+
+    <span class="cmt">// RXNE + 错误检测 (同USART3策略)</span>
+    <span class="kw">if</span>(USART_GetITStatus(AIR780E_UART,USART_IT_RXNE)!=RESET||
+       (sr&(...))!=<span class="num">0</span>){
+        <span class="kw">uint8_t</span> ch = USART_ReceiveData(AIR780E_UART);
+        <span class="kw">if</span>(无错误){g_Air780eRxBuffer[g_Air780eRxLen++]=ch;}
+    }
+
+    <span class="cmt">// IDLE中断: 一帧AT应答接收完毕</span>
+    <span class="kw">if</span>(USART_GetITStatus(AIR780E_UART,USART_IT_IDLE)!=RESET){
+        <span class="kw">volatile uint32_t</span> tmp=AIR780E_UART->SR;
+        tmp=AIR780E_UART->DR; (<span class="kw">void</span>)tmp; <span class="cmt">// 软件清除IDLE</span>
+        g_Air780eRxBuffer[g_Air780eRxLen]=<span class="str">'\0'</span>;
+        s_RxFlag=<span class="num">true</span>; <span class="cmt">// 通知状态机处理</span>
+    }
+}
+</div>
+    </div>
+    <div class="panel">
+      <h3>6. 信号量流水线同步算法</h3>
+      <div class="code-block" style="height:200px;">
+<span class="cmt">// mycode.c:360-429  GPS_TASK 核心循环</span>
+<span class="kw">while</span>(<span class="num">1</span>) {
+    <span class="cmt">// 阻塞等待采集许可 (MQTT发送成功后才释放)</span>
+    <span class="kw">if</span>(xSemaphoreTake(gpsCaptureSync,portMAX_DELAY)==pdTRUE){
+        GPS_Enable();               <span class="cmt">// 开串口</span>
+
+        <span class="cmt">// 采集一条完整GGA</span>
+        <span class="kw">while</span>(!gga_collected){
+            xQueueReceive(gpsQueue,&ch,portMAX_DELAY);
+            <span class="cmt">// ... 组包、识别GGA、解析坐标、组JSON</span>
+            xQueueSend(mqttPublishQueue,json_buf,<span class="num">0</span>);
+        }
+
+        GPS_Disable();              <span class="cmt">// 关串口</span>
+        <span class="cmt">// 再次阻塞，等待MQTT_APP释放信号量</span>
     }
 }
 </div>
@@ -745,72 +1317,72 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
   </div>
 </section>
 
-<!-- ===================== 源码结构 ===================== -->
+<!-- ==================== 源码结构 ==================== -->
 <section class="section" id="tab-code">
   <div class="section-title">源码结构 — 文件依赖与模块关系</div>
 
   <div class="grid2">
     <div class="panel">
-      <h3>文件树</h3>
-      <div class="code-block" style="height:400px;font-size:11px;">
+      <h3>文件树 (User/应用层)</h3>
+      <div class="code-block" style="height:420px;font-size:11px;">
 <span style="color:var(--orange)">User/</span>
-├── <span style="color:var(--accent)">main.c</span>              <span style="color:var(--text2)">← 系统入口, BSP_Init, AppTaskCreate</span>
-├── <span style="color:var(--accent)">mycode.c</span>            <span style="color:var(--text2)">← 核心业务: GPS采集/解析 + MQTT发布 + 信号量同步</span>
+├── <span style="color:var(--accent)">main.c</span>              <span style="color:var(--text2)">← 系统入口, BSP_Init(), AppTaskCreate()</span>
+│                           <span style="color:var(--text2)">   USART3硬件回环诊断测试</span>
+├── <span style="color:var(--accent)">mycode.c</span>            <span style="color:var(--text2)">← ★ 核心业务逻辑 544行</span>
+│                           <span style="color:var(--text2)">   GPS_Init/Enable/Disable/SendCmd</span>
+│                           <span style="color:var(--text2)">   TAU1201_Config() 关闭无用NMEA</span>
+│                           <span style="color:var(--text2)">   USART3_IRQHandler() 中断接收</span>
+│                           <span style="color:var(--text2)">   task_gps_forward() GPS采集任务</span>
+│                           <span style="color:var(--text2)">   task_mqtt_app() MQTT发布任务</span>
+│                           <span style="color:var(--text2)">   get_csv_field/format_time/</span>
+│                           <span style="color:var(--text2)">   format_degree_minute() 数据转换</span>
 ├── stm32f10x_it.c       <span style="color:var(--text2)">← FreeRTOS SysTick/PendSV/SVC</span>
 ├── stm32f10x_conf.h     <span style="color:var(--text2)">← 标准外设库配置文件</span>
 ├── <span style="color:var(--orange)">Air780e/</span>
-│   ├── <span style="color:var(--accent)">Air780e.c</span>       <span style="color:var(--text2)">← 4G模块驱动: AT指令机/MQTT状态机/离线缓存</span>
+│   ├── <span style="color:var(--accent)">Air780e.c</span>       <span style="color:var(--text2)">← ★ 4G模块驱动 767行</span>
+│   │                       <span style="color:var(--text2)">   硬件初始化 + 开关机/复位</span>
+│   │                       <span style="color:var(--text2)">   Air780e_StateMachine() 13状态</span>
+│   │                       <span style="color:var(--text2)">   Air780e_SendCmd() AT指令收发</span>
+│   │                       <span style="color:var(--text2)">   HandleConnectionError() 退避</span>
+│   │                       <span style="color:var(--text2)">   MqttCache_Push/Pop/Flush 缓存</span>
+│   │                       <span style="color:var(--text2)">   USART2_IRQHandler() IDLE中断</span>
 │   └── Air780e.h         <span style="color:var(--text2)">← API声明/状态枚举/上下文结构体</span>
 ├── <span style="color:var(--orange)">usart/</span>
 │   ├── bsp_usart.c       <span style="color:var(--text2)">← USART1配置 + 异步日志系统</span>
-│   └── bsp_usart.h       <span style="color:var(--text2)">← LOG_PRINT宏/日志队列声明</span>
-├── <span style="color:var(--orange)">led/</span> bsp_led.c        <span style="color:var(--text2)">← LED GPIO初始化</span>
-└── <span style="color:var(--orange)">Key/</span> bsp_key.c        <span style="color:var(--text2)">← 按键扫描</span>
-
-<span style="color:var(--orange)">freeRTOS/</span>              <span style="color:var(--text2)">← FreeRTOS V9.0.0 内核</span>
+│   │                       <span style="color:var(--text2)">   Log_Init/Log_Printf/Log_Task</span>
+│   └── bsp_usart.h       <span style="color:var(--text2)">← LOG_PRINT宏/队列声明/开关变量</span>
+├── <span style="color:var(--orange)">led/</span> bsp_led.c        <span style="color:var(--text2)">← LED GPIO初始化 (PC13/PC2/PC3)</span>
+├── <span style="color:var(--orange)">Key/</span> bsp_key.c        <span style="color:var(--text2)">← 按键扫描 (PB4/PB12)</span>
+│
+<span style="color:var(--orange)">freeRTOS/</span>              <span style="color:var(--text2)">← FreeRTOS V9.0.0 内核 (heap_4)</span>
 <span style="color:var(--orange)">Library/</span>               <span style="color:var(--text2)">← STM32标准外设库 V3.5 + CMSIS</span>
 </div>
     </div>
 
     <div class="panel">
       <h3>模块依赖关系</h3>
-      <svg viewBox="0 0 420 400" style="width:100%">
+      <svg viewBox="0 0 420 420" style="width:100%">
         <defs>
           <marker id="depArrow" markerWidth="6" markerHeight="4" refX="6" refY="2" orient="auto"><path d="M0,0 L6,2 L0,4 Z" fill="#7c3aed"/></marker>
         </defs>
-
-        <!-- mycode.c center -->
         <rect x="120" y="150" width="160" height="40" rx="6" fill="rgba(0,212,255,0.12)" stroke="#00d4ff" stroke-width="2"/>
         <text x="200" y="175" text-anchor="middle" fill="#00d4ff" font-size="13" font-weight="700">mycode.c (核心)</text>
-
-        <!-- main.c -->
         <rect x="120" y="50" width="160" height="36" rx="6" fill="rgba(124,58,237,0.08)" stroke="#7c3aed" stroke-width="1"/>
         <text x="200" y="72" text-anchor="middle" fill="#d2a8ff" font-size="12">main.c (入口)</text>
         <line x1="200" y1="86" x2="200" y2="148" stroke="#7c3aed" stroke-width="1.5" marker-end="url(#depArrow)"/>
         <text x="210" y="122" fill="#7c3aed" font-size="9">xTaskCreate</text>
-
-        <!-- Air780e.c -->
         <rect x="20" y="260" width="140" height="36" rx="6" fill="rgba(16,185,129,0.06)" stroke="#10b981" stroke-width="1"/>
         <text x="90" y="282" text-anchor="middle" fill="#10b981" font-size="12">Air780e.c (4G驱动)</text>
         <line x1="140" y1="278" x2="120" y2="180" stroke="#10b981" stroke-width="1" marker-end="url(#depArrow)"/>
         <text x="55" y="235" fill="#10b981" font-size="8">调用API</text>
-
-        <!-- bsp_usart.c -->
         <rect x="250" y="260" width="140" height="36" rx="6" fill="rgba(236,72,153,0.06)" stroke="#ec4899" stroke-width="1"/>
         <text x="320" y="282" text-anchor="middle" fill="#ec4899" font-size="12">bsp_usart.c (串口/日志)</text>
         <line x1="290" y1="260" x2="230" y2="192" stroke="#ec4899" stroke-width="1" marker-end="url(#depArrow)"/>
         <text x="310" y="230" fill="#ec4899" font-size="8">LOG_PRINT</text>
-
-        <!-- FreeRTOS -->
-        <rect x="130" y="340" width="140" height="36" rx="6" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,2"/>
-        <text x="200" y="362" text-anchor="middle" fill="#f59e0b" font-size="12">FreeRTOS V9.0</text>
-        <line x1="185" y1="340" x2="175" y2="192" stroke="#f59e0b" stroke-width="0.8" marker-end="url(#depArrow)"/>
-        <line x1="215" y1="340" x2="225" y2="192" stroke="#f59e0b" stroke-width="0.8" marker-end="url(#depArrow)"/>
-
-        <!-- Hardware -->
-        <rect x="130" y="340" width="140" height="36" rx="6" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,2"/>
-
-        <!-- StdPeriph -->
+        <rect x="130" y="350" width="140" height="36" rx="6" fill="rgba(245,158,11,0.06)" stroke="#f59e0b" stroke-width="1" stroke-dasharray="4,2"/>
+        <text x="200" y="372" text-anchor="middle" fill="#f59e0b" font-size="12">FreeRTOS V9.0</text>
+        <line x1="185" y1="350" x2="175" y2="192" stroke="#f59e0b" stroke-width="0.8" marker-end="url(#depArrow)"/>
+        <line x1="215" y1="350" x2="225" y2="192" stroke="#f59e0b" stroke-width="0.8" marker-end="url(#depArrow)"/>
         <rect x="10" y="50" width="90" height="30" rx="4" fill="rgba(148,163,184,0.06)" stroke="#94a3b8" stroke-width="0.5" stroke-dasharray="3,2"/>
         <text x="55" y="69" text-anchor="middle" fill="#94a3b8" font-size="10">STM32F10x</text>
         <text x="55" y="82" text-anchor="middle" fill="#94a3b8" font-size="9">StdPeriphLib</text>
@@ -821,7 +1393,7 @@ main { position:relative; z-index:1; max-width:1400px; margin:0 auto; padding:20
   <div class="panel full" style="margin-top:18px;">
     <h3>代码统计</h3>
     <div class="grid3">
-      <div class="panel stat-card accent"><div class="value">~800</div><div class="label">核心代码行数 (User/)</div></div>
+      <div class="panel stat-card accent"><div class="value">~1,600</div><div class="label">核心代码行数 (User/)</div></div>
       <div class="panel stat-card green"><div class="value">8</div><div class="label">用户源文件</div></div>
       <div class="panel stat-card purple"><div class="value">3</div><div class="label">串口 (USART1/2/3)</div></div>
     </div>
@@ -838,6 +1410,11 @@ document.querySelectorAll('#navbar button').forEach(btn => {
     btn.classList.add('active');
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
     document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    // Redraw connections for architecture tabs
+    setTimeout(() => {
+      if(btn.dataset.tab==='overview') drawArchConnections('archContainer','connCanvas');
+      if(btn.dataset.tab==='defense') drawArchConnections('archContainerDefense','connCanvasDefense');
+    }, 150);
   });
 });
 
@@ -845,30 +1422,29 @@ document.querySelectorAll('#navbar button').forEach(btn => {
 const canvas = document.getElementById('bgCanvas');
 const ctx = canvas.getContext('2d');
 let w,h;
-function resizeCanvas() { w=canvas.width=window.innerWidth; h=canvas.height=window.innerHeight; }
-resizeCanvas(); window.addEventListener('resize', resizeCanvas);
+function resizeCanvas(){w=canvas.width=window.innerWidth;h=canvas.height=window.innerHeight}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
 
 const particles = Array.from({length:40}, () => ({
-  x: Math.random()*w, y: Math.random()*h,
-  vx: (Math.random()-0.5)*0.8, vy: (Math.random()-0.5)*0.8,
-  r: Math.random()*1.5+0.5, o: Math.random()*0.3+0.1
+  x:Math.random()*w, y:Math.random()*h,
+  vx:(Math.random()-0.5)*0.8, vy:(Math.random()-0.5)*0.8,
+  r:Math.random()*1.5+0.5, o:Math.random()*0.3+0.1
 }));
 
-function drawBg() {
+function drawBg(){
   ctx.clearRect(0,0,w,h);
   particles.forEach(p => {
-    p.x += p.vx; p.y += p.vy;
+    p.x+=p.vx;p.y+=p.vy;
     if(p.x<0||p.x>w)p.vx*=-1; if(p.y<0||p.y>h)p.vy*=-1;
-    ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
-    ctx.fillStyle = `rgba(0,212,255,${p.o})`; ctx.fill();
+    ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
+    ctx.fillStyle=`rgba(0,212,255,${p.o})`;ctx.fill();
   });
-  // connections
   for(let i=0;i<particles.length;i+=3){
     for(let j=i+1;j<i+4&&j<particles.length;j++){
       const dx=particles[i].x-particles[j].x, dy=particles[i].y-particles[j].y;
       const d=Math.sqrt(dx*dx+dy*dy);
       if(d<150){
-        ctx.beginPath(); ctx.moveTo(particles[i].x,particles[i].y);
+        ctx.beginPath();ctx.moveTo(particles[i].x,particles[i].y);
         ctx.lineTo(particles[j].x,particles[j].y);
         ctx.strokeStyle=`rgba(0,212,255,${0.08*(1-d/150)})`;
         ctx.stroke();
@@ -880,55 +1456,37 @@ function drawBg() {
 drawBg();
 
 // ========================== Architecture Connections ==========================
-function drawArchConnections() {
-  const cc = document.getElementById('connCanvas');
-  const container = document.getElementById('archContainer');
+function drawArchConnections(containerId, canvasId){
+  const cc = document.getElementById(canvasId);
+  const container = document.getElementById(containerId);
   if(!cc||!container) return;
   cc.width = container.offsetWidth;
   cc.height = container.offsetHeight;
   const cctx = cc.getContext('2d');
-
   const boxes = container.querySelectorAll('.arch-box');
   const rects = [];
   boxes.forEach(b => {
     const r = b.getBoundingClientRect();
     const cr = container.getBoundingClientRect();
-    rects.push({
-      x: r.left-cr.left+r.width/2, y: r.top-cr.top+r.height/2,
-      w: r.width, h: r.height
-    });
+    rects.push({x:r.left-cr.left+r.width/2, y:r.top-cr.top+r.height/2, w:r.width, h:r.height});
   });
-
-  if(rects.length < 5) return;
-
-  // Draw connections
-  const lines = [
-    [1,2,'#10b981',1.5],[2,3,'#00d4ff',1.5],[1,5,'#10b981',1],  // gps-mcu, mcu-lte, gps-debug
-    [3,4,'#f59e0b',1.5],[2,5,'#ec4899',1],[2,6,'#fbbf24',0.8],[2,7,'#a78bfa',0.8]
-  ];
-
-  lines.forEach(([a,b,color,w]) => {
+  if(rects.length<5) return;
+  const lines = [[1,2,'#10b981',1.5],[2,3,'#00d4ff',1.5],[1,5,'#10b981',1],[3,4,'#f59e0b',1.5],[2,5,'#ec4899',1]];
+  lines.forEach(([a,b,color,wid])=>{
     if(rects[a]&&rects[b]){
       cctx.beginPath();
-      cctx.moveTo(rects[a].x, rects[a].y);
-      const midX = (rects[a].x+rects[b].x)/2;
-      const midY = (rects[a].y+rects[b].y)/2;
-      cctx.quadraticCurveTo(midX+20, midY-10, rects[b].x, rects[b].y);
-      cctx.strokeStyle = color;
-      cctx.lineWidth = w;
-      cctx.setLineDash([6,4]);
-      cctx.stroke();
-      cctx.setLineDash([]);
-
-      // Draw dot at midpoint
-      const t=0.5; const mx=midX+5, my=midY-5;
-      cctx.beginPath(); cctx.arc(mx,my,2.5,0,2*Math.PI);
-      cctx.fillStyle = color; cctx.fill();
+      cctx.moveTo(rects[a].x,rects[a].y);
+      const midX=(rects[a].x+rects[b].x)/2, midY=(rects[a].y+rects[b].y)/2;
+      cctx.quadraticCurveTo(midX+20,midY-10,rects[b].x,rects[b].y);
+      cctx.strokeStyle=color;cctx.lineWidth=wid;cctx.setLineDash([6,4]);cctx.stroke();cctx.setLineDash([]);
+      cctx.beginPath();cctx.arc(midX+5,midY-5,2.5,0,2*Math.PI);cctx.fillStyle=color;cctx.fill();
     }
   });
 }
-setTimeout(drawArchConnections,200);
-window.addEventListener('resize', () => setTimeout(drawArchConnections,200));
+setTimeout(()=>{drawArchConnections('archContainer','connCanvas');drawArchConnections('archContainerDefense','connCanvasDefense');},300);
+window.addEventListener('resize',()=>{
+  setTimeout(()=>{drawArchConnections('archContainer','connCanvas');drawArchConnections('archContainerDefense','connCanvasDefense');},200);
+});
 
 // ========================== Tooltip ==========================
 const tooltip = document.getElementById('tooltip');
@@ -946,42 +1504,40 @@ document.querySelectorAll('.arch-box').forEach(box => {
   box.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
 });
 
-// ========================== State Machine Interaction ==========================
+// State machine tooltips
 document.querySelectorAll('.sm-state').forEach(state => {
   state.addEventListener('click', () => {
     document.querySelectorAll('.sm-state').forEach(s => s.style.boxShadow='');
     state.style.boxShadow = '0 0 20px rgba(0,212,255,0.4)';
-    const sname = state.dataset.state;
-
     const descriptions = {
-      power_off: 'POWER_OFF: 模块处于关机状态。等待 PowerOn() 拉高 PWR 引脚启动。',
-      init_reset: 'INIT_RESET: 发送 AT+IPR=115200 固定波特率，然后 AT+RESET 重启模块。等待3.5秒。',
-      check_csq: 'CHECK_CSQ: 发送 AT+CSQ 查询信号质量。正常响应: +CSQ: xx,99。',
-      check_ccid: 'CHECK_CCID: 发送 AT+CCID 读取SIM卡ICCID，确认SIM卡在位。',
-      check_cgreg: 'CHECK_CGREG: 发送 AT+CGREG? 查询GPRS网络注册状态。期望: +CGREG: 0,1。',
-      check_cgatt: 'CHECK_CGATT: 发送 AT+CGATT? 查询GPRS附着状态。期望: +CGATT: 1。',
-      mqtt_config: 'MQTT_CONFIG: 发送 AT+MCONFIG 配置MQTT参数（ClientID、用户名、密码）。超时2秒。',
-      mqtt_mipstart: 'MIPSTART: 发送 AT+MIPSTART 发起TCP连接到MQTT Broker (8.136.109.126:1883)。超时5秒。',
-      mqtt_mconnect: 'MCONNECT: 发送 AT+MCONNECT=1,60 发起MQTT握手。超时5秒等待 CONNACK OK。',
-      mqtt_msub: 'MSUB: 发送 AT+MSUB 订阅默认主题 /BEIDOU001/cmd/time。QoS=1。',
-      mqtt_connected: 'CONNECTED: MQTT完全就绪！可以发布/订阅消息。定期监测 URC 断线信号。',
-      wait_backoff: 'WAIT_BACKOFF: 等待指数退避时间 (2s→4s→8s...max 60s)，然后重试 CHECK_CSQ。',
-      error: 'ERROR: 严重错误状态。连续失败5次进入。10秒后自动硬件复位。'
+      power_off:'POWER_OFF: 模块处于关机状态。等待 PowerOn() 拉高 PWR 引脚启动。',
+      init_reset:'INIT_RESET: 发送 AT+IPR=115200 固定波特率，然后 AT+RESET 重启。等待3.5秒。',
+      check_csq:'CHECK_CSQ: 发送 AT+CSQ 查询信号质量。正常响应: +CSQ: xx,99。',
+      check_ccid:'CHECK_CCID: 发送 AT+CCID 读取SIM卡ICCID，确认SIM卡在位。',
+      check_cgreg:'CHECK_CGREG: 发送 AT+CGREG? 查询GPRS网络注册状态。期望: +CGREG: 0,1。',
+      check_cgatt:'CHECK_CGATT: 发送 AT+CGATT? 查询GPRS附着状态。期望: +CGATT: 1。',
+      mqtt_config:'MQTT_CONFIG: 发送 AT+MCONFIG 配置MQTT参数（ClientID、用户名、密码）。超时2秒。',
+      mqtt_mipstart:'MIPSTART: 发送 AT+MIPSTART 发起TCP连接 (8.136.109.126:1883)。超时5秒。',
+      mqtt_mconnect:'MCONNECT: 发送 AT+MCONNECT=1,60 发起MQTT握手。超时5秒等待 CONNACK OK。',
+      mqtt_msub:'MSUB: 发送 AT+MSUB 订阅 /BEIDOU001/cmd/time。QoS=1。',
+      mqtt_connected:'CONNECTED: MQTT完全就绪！可以发布/订阅消息。持续监测 URC 断线信号。',
+      wait_backoff:'WAIT_BACKOFF: 等待指数退避时间 (2s→4s→8s...max 60s)，然后重试 CHECK_CSQ。',
+      error:'ERROR: 严重错误状态。连续失败5次进入。10秒后自动硬件复位。'
     };
-
+    const sname = state.dataset.state;
     if(tooltip && descriptions[sname]) {
-      tooltip.innerHTML = '<b>' + (state.textContent.trim().split('\n')[0]) + '</b><br>' + descriptions[sname];
+      tooltip.innerHTML = '<b>'+(state.textContent.trim().split('\n')[0])+'</b><br>'+descriptions[sname];
       tooltip.classList.add('show');
-      setTimeout(() => tooltip.classList.remove('show'), 3000);
+      setTimeout(() => tooltip.classList.remove('show'), 4000);
     }
   });
 });
 
-// ========================== Task Detail ==========================
-function showTaskDetail(task) {
+// Task Detail
+function showTaskDetail(task){
   const details = {
-    gps: {name:'GPS_TASK', code:'mycode.c:228-318', desc:'GPS数据采集与解析任务。优先级最高(4)，确保115200bps串口数据不丢包。通过信号量gpsCaptureSync与MQTT任务同步，实现"一收一发"节奏控制。核心流程：等待信号量→使能USART3→采集完整GGA→关闭USART3→format_gps_data()解析校验→送入mqttPublishQueue。'},
-    mqtt: {name:'MQTT_APP', code:'mycode.c:341-411', desc:'MQTT应用主任务。轮询Air780e_StateMachine()维持4G连接，从mqttPublishQueue取数据并通过AT+MPUB发布到云端。发布失败自动重试3次。发送完成后释放gpsCaptureSync信号量启动下一轮GPS采集。离线时消息自动缓存到Air780e内部循环队列。'}
+    gps:{name:'GPS_TASK',code:'mycode.c:324-430',desc:'GPS数据采集与解析任务。优先级最高(4)，确保115200bps串口数据不丢包。通过信号量gpsCaptureSync与MQTT任务同步。核心流程：等待信号量→使能USART3→采集完整GGA→关闭USART3→format_gps_data()解析校验→送入mqttPublishQueue。'},
+    mqtt:{name:'MQTT_APP',code:'mycode.c:463-522',desc:'MQTT应用主任务。轮询Air780e_StateMachine()维持4G连接，从mqttPublishQueue取数据并通过AT+MPUB发布到云端。发布失败自动重试3次。发送完成后释放gpsCaptureSync信号量启动下一轮GPS采集。离线时消息自动缓存。'}
   };
   const d = details[task];
   if(d && tooltip){
@@ -991,19 +1547,12 @@ function showTaskDetail(task) {
   }
 }
 
-// ========================== Code Line Highlight ==========================
-document.querySelectorAll('.code-line').forEach(line => {
-  line.addEventListener('click', () => {
-    document.querySelectorAll('.code-line').forEach(l => l.classList.remove('highlight'));
-    line.classList.add('highlight');
-  });
-});
-
-console.log('%c🛰 北斗定位+4G终端 — 系统可视化平台已就绪 %c| %cSTM32F103C8T6 + FreeRTOS + Air780e + TAU1201',
-  'color:#00d4ff;font-size:14px;','color:#94a3b8;','color:#7c3aed;');
-console.log('%c点击顶部导航栏切换查看: 系统概览 | 硬件原理图 | 任务调度 | 数据流 | 状态机 | 关键算法 | 源码结构',
+console.log('%c🛰 北斗导线覆冰观测系统 — 答辩可视化平台已就绪',
+  'color:#00d4ff;font-size:16px;font-weight:700;');
+console.log('%cSTM32F103C8T6 + FreeRTOS V9.0 + Air780e + TAU1201',
+  'color:#7c3aed;font-size:13px;');
+console.log('%c导航: 答辩讲解 | 系统概览 | 硬件原理图 | 任务调度 | 数据流 | 状态机 | 关键算法 | 源码结构',
   'color:#94a3b8;font-size:12px;');
-console.log('%c所有模块均可悬停交互查看详情 🔍', 'color:#f59e0b;font-size:12px;');
 </script>
 </body>
 </html>
